@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: airbot_play_twofinger
+    relative_path: urdf/AirbotPlayTwoFinger.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/AirbotPlayTwoFinger.srdf
+  CONFIG:
+    author_name: 1564
+    author_email: 1352674740@qq.com
+    generated_timestamp: 1689002764

@@ -1,0 +1,1 @@
+/usr/bin/g++ -fPIC -g  -shared -Wl,-soname,libgmock_maind.so -o ../lib/libgmock_maind.so CMakeFiles/gmock_main.dir/src/gmock_main.cc.o  -Wl,-rpath,/home/ghz/ARX5/ros/src/arx5/arx5_urdfs/airbot_play_v1/build/gtest/lib ../lib/libgmockd.so ../lib/libgtestd.so -lpthread 

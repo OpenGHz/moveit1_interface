@@ -1,0 +1,19 @@
+<package>
+
+  <name>airbot_play_follow_basic</name>
+  <version>0.3.0</version>
+  <description>
+     airbot_play_follow_basic package based on moveit
+  </description>
+  <author email="thefoxfoxfox@outlook.com">han</author>
+  <maintainer email="thefoxfoxfox@outlook.com">han</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://moveit.ros.org/</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>moveit</run_depend>
+  <run_depend>trac_ik</run_depend>
+
+</package>

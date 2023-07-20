@@ -1,0 +1,30 @@
+<launch>
+
+  <!-- 参数配置 -->
+  <arg name="fake_control" default="false" />
+  <arg name="use_sim"      default="false" />
+  <arg name="use_rviz"     default="false" />
+  <arg name="drag"         default="false" />
+  <arg name="use_sim_time" default="false" />
+  <arg name="target_moveit_config" default="airbot_play_config"/>
+  <arg name="use_moveit" default="true"/>
+  <!-- 设置使用仿真时间全局参数 -->
+  <param if="$(arg use_sim_time)" name="/use_sim_time" type="bool" value="true" />
+
+  <!-- 带命arx5名空间启动 -->
+  <group ns="airbot_play">
+    <!-- 实机控制底层ROS接口 -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <!-- moveit controller server -->
+    <node pkg="airbot_play_follow_basic" type="follow_joint_trajectory_server_basic.py" name="follow_joint_trajectory_server" output="screen">
+    </node>
+    <!-- demo启动 -->
+    <include file="$(find airbot_play_launch)/airbot_play_demo.launch">
+      <arg if="$(arg fake_control)" name="use_rviz" value="true"/>
+      <arg unless="$(arg fake_control)" name="use_rviz" value="$(arg use_rviz)"/>
+      <arg name="target_moveit_config" value="$(arg target_moveit_config)"/>
+      <arg name="use_moveit" value="$(arg use_moveit)"/>
+    </include>
+  </group>
+
+</launch>

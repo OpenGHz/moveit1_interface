@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: arx5_blue_shine
+    relative_path: urdf/arx5_blue_shine.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/arx5_blue_shine.srdf
+  CONFIG:
+    author_name: ghz
+    author_email: 1352674740@qq.com
+    generated_timestamp: 1682584478

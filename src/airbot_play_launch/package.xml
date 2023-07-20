@@ -1,0 +1,17 @@
+<package>
+
+  <name>airbot_play_launch</name>
+  <version>0.3.0</version>
+  <description>
+     airbot_play_launch package based on moveit
+  </description>
+  <author email="thefoxfoxfox@outlook.com">han</author>
+  <maintainer email="thefoxfoxfox@outlook.com">han</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://moveit.ros.org/</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
