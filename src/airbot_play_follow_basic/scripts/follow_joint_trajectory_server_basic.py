@@ -94,11 +94,15 @@ class MoveItAction(object):
             else: exit('暂不支持该类型的插值方式')
         else: exit('暂不支持该类型的插值方式')
 
+        min_vel = 2.593
+        max_vel = 4*math.pi
+        
         joints_matrix_new = np.apply_along_axis(interpolate,axis=0,arr=joints_matrix)  # axis=0表示对各个列施加函数
         speed_matrix = np.apply_along_axis(Interpolate.linear_speed_calculate,axis=0,arr=joints_matrix_new,t=self.t_delta)  # 速度计算
         joints_list = joints_matrix_new.tolist()
 
-        speed_list:list = speed_matrix.tolist()
+        speed_min_limit_matrix = np.abs(speed_matrix) + min_vel  # 对速度求绝对值，因为底层仅接收正速度；限制最小速度
+        speed_list:list = np.where(speed_min_limit_matrix>max_vel,max_vel,speed_min_limit_matrix).tolist()  # 限制最大速度
         speed_list.insert(0,list(speed_list[0]))  # 发送第一个点的期望速度设置为与第二个点相同
 
         # 遍历所有插值时间发送cmd
