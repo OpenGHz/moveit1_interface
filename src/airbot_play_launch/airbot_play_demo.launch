@@ -1,8 +1,7 @@
 <launch>
 
-  <arg name="target_moveit_config" default="airbot_play_config"/>
+  <arg name="target_moveit_config" default="airbot_play_inspire_eg2_4c_v2_arm_group_config"/>
   <arg name="use_rviz" default="false"/>
-  <arg name="use_moveit" default="true"/>
   <!-- specify the planning pipeline -->
   <arg name="pipeline" default="ompl"/>
   <!-- If needed, broadcast static tf for robot root -->
@@ -15,7 +14,7 @@
   <arg name="configs_dir" value="$(arg parent_path)moveit_configs"/>
   <arg name="target_config_dir" value="$(arg configs_dir)/$(arg target_moveit_config)/launch"/>
   <!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default) -->
-  <include file="$(arg target_config_dir)/move_group.launch" if="$(arg use_moveit)">
+  <include file="$(arg target_config_dir)/move_group.launch">
     <arg name="pipeline" value="$(arg pipeline)"/>
     <arg name="load_robot_description" value="true"/>
   </include>
