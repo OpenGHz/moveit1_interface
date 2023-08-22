@@ -42,12 +42,11 @@ sudo apt-get install python3-catkin-tools 2> /dev/null || pip3 install catkin-to
 # build the ros workspace
 catkin clean -y 2> /dev/null
 catkin build || { echo -e "${FAILED}ROS workspace build failed.${DEF}" && exit 0; }
-cd ..
 
 # auto modify the .bashrs or .zshrc file
 echo "source $(pwd)/devel/setup.${shtype}" >> ~/."${name}"
 
 # OK
 if [ "$rosdepwarn" == 1 ];then echo -e "${OK}ROS config OK with warning.${DEF}"
-else echo -e "${OK}ROS config OK.${DEF}"
+else echo -e "${OK}Config OK.${DEF}"
 fi
