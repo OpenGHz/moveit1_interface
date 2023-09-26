@@ -1,0 +1,10 @@
+<launch>
+
+  <!-- 带airbot_play命名空间启动 -->
+  <!-- <group ns="airbot_play"> -->
+    <!-- gazebo demo启动 -->
+    <include file="$(find airbot_play_inspire_eg2_4c_v2_gazebo_all_config)/launch/demo_gazebo.launch">
+    </include>
+  <!-- </group> -->
+
+</launch>

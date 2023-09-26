@@ -11,7 +11,7 @@
   <!-- 设置使用仿真时间全局参数 -->
   <param if="$(arg use_sim_time)" name="/use_sim_time" type="bool" value="true" />
 
-  <!-- 带命arx5名空间启动 -->
+  <!-- 带airbot_play命名空间启动 -->
   <group ns="airbot_play">
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
     <!-- moveit controller server -->

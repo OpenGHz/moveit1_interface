@@ -428,8 +428,9 @@
         </actuator>
     </transmission>
     <gazebo>
-        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" >
             <robotNamespace>/</robotNamespace>
+            <!-- <robotParam>/airbot_play/robot_description</robotParam> -->
         </plugin>
     </gazebo>
   <!-- ROS base_link to UR 'Base' Coordinates transform -->
