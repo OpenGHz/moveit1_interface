@@ -6,8 +6,6 @@ from actionlib import SimpleActionServer
 
 from scipy.interpolate   import CubicSpline,make_interp_spline,interp1d
 from control_msgs.msg    import FollowJointTrajectoryGoal
-from control_msgs.msg    import FollowJointTrajectoryResult
-from control_msgs.msg    import FollowJointTrajectoryFeedback
 from control_msgs.msg    import FollowJointTrajectoryAction
 from trajectory_msgs.msg import JointTrajectoryPoint
 from typing import List,Union
@@ -19,16 +17,12 @@ from sensor_msgs.msg import JointState
 
 
 class MoveItAction(object):
-	# TODO：这两个类目前还没有怎么用起来
-    _feedback = FollowJointTrajectoryFeedback()
-    _result = FollowJointTrajectoryResult()
     CONTROL_MODE = ['torque','position']  # 控制模式选择
 	# Action initialisation
-    def __init__(self,name,control_mode,interpolation=5):
+    def __init__(self,name,interpolation=5):
         """
             name：action服务器名。
             interpolation支持：1为线性插值；2-5为n次样条插值。
-            control_mode：力控或位控（CONTROL_MODE = ['torque','position']  # 控制模式选择）
         """
         self.interpolation = interpolation
         self.t_delta = 0.005  # 单位:s
@@ -44,13 +38,9 @@ class MoveItAction(object):
         self.cmd = JointState()
         self.cmd.header.stamp = rospy.Time.now()
         self.cmd.header.frame_id = 'airbot_play'
-        # self.cmd.mode = control_mode
-        # self.cmd.kp = [100 for _ in range(self.arm_joint_nums)]
-        # self.cmd.kd = [10 for _ in range(self.arm_joint_nums)]
         self.cmd.position = self.init_pose
         self.cmd.velocity = [0.8 for _ in range(self.arm_joint_nums)]  # 初始化速度值23度/s，从而控制电机缓慢移动到0位
         self.cmd.effort = [0 for _ in range(self.arm_joint_nums)]
-        # self.cmd.id = [id for id in range(1,self.arm_joint_nums+1)]
 
         rospy.Timer(rospy.Duration(1. / 200.),self.control_continue)
 

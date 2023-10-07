@@ -1,12 +1,12 @@
 <package>
 
-  <name>airbot_play_config</name>
+  <name>airbot_play_v1_config</name>
   <version>0.3.0</version>
   <description>
-     An automatically generated package with all the configuration and launch files for using the ARX-5s-V5.0-urdf ceshi3 with the MoveIt Motion Planning Framework
+     An automatically generated package with all the configuration and launch files for using the airbot_play_v1 with the MoveIt Motion Planning Framework
   </description>
-  <author email="1352674740@qq.com">12323</author>
-  <maintainer email="1352674740@qq.com">12323</maintainer>
+  <author email="1352674740@qq.com">GHz</author>
+  <maintainer email="1352674740@qq.com">GHz</maintainer>
 
   <license>BSD</license>
 

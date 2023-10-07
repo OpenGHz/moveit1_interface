@@ -2,15 +2,12 @@
 <!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
      Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
-<robot name="ARX-5s-V5.0-urdf ceshi3">
-    <mujoco>
-        <compiler meshdir="../meshes/" balanceinertia="true" discardvisual="false" />
-    </mujoco>
+<robot name="airbot_play_v1">
     <link name="base_link">
         <inertial>
-            <origin xyz="-2.9949E-05 3.0537E-05 -0.033016" rpy="0 0 0" />
+            <origin xyz="-2.9949E-05 3.0537E-05 0.027284" rpy="0 0 0" />
             <mass value="0.44071" />
-            <inertia ixx="1.7392E-04" ixy="-3.4525E-07" ixz="-5.9337E-07" iyy="1.7547E-04" iyz="1.1271E-06" izz="1.5925E-04" />
+            <inertia ixx="0.00017392" ixy="-3.5E-07" ixz="-5.9E-07" iyy="0.00017547" iyz="1.13E-06" izz="0.00015925" />
         </inertial>
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -30,9 +27,9 @@
     </link>
     <link name="link1">
         <inertial>
-            <origin xyz="-3.3048E-08 -0.00059451 0.016543" rpy="0 0 0" />
-            <mass value="0.051342" />
-            <inertia ixx="5.7689E-05" ixy="-7E-11" ixz="-3E-11" iyy="1.6943E-05" iyz="-3.3983E-07" izz="5.5562E-05" />
+            <origin xyz="-0.00011034 -6.8411E-06 -0.023655" rpy="0 0 0" />
+            <mass value="0.078163" />
+            <inertia ixx="9.22E-05" ixy="-1E-08" ixz="5E-08" iyy="3.014E-05" iyz="-7.4E-07" izz="8.652E-05" />
         </inertial>
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -40,7 +37,7 @@
                 <mesh filename="package://airbot_play_v1/meshes/link1.STL" />
             </geometry>
             <material name="">
-                <color rgba="1 1 1 1" />
+                <color rgba="0.75294 0.75294 0.75294 1" />
             </material>
         </visual>
         <collision>
@@ -51,17 +48,17 @@
         </collision>
     </link>
     <joint name="joint1" type="revolute">
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <origin xyz="0 0 0.1005" rpy="0 0 0" />
         <parent link="base_link" />
         <child link="link1" />
         <axis xyz="0 0 1" />
-        <limit lower="-10" upper="10" effort="100" velocity="1000" />
+        <limit lower="-10" upper="10" effort="100" velocity="110" />
     </joint>
     <link name="link2">
         <inertial>
-            <origin xyz="0.13234 -0.00019055 -0.0019415" rpy="0 0 0" />
-            <mass value="1.1379" />
-            <inertia ixx="5.3430993E-04" ixy="-4.820824E-05" ixz="7.5502E-07" iyy="0" iyz="-2.6064E-07" izz="1.617805616E-02" />
+            <origin xyz="0.13157 0.00062386 -0.0022903" rpy="0 0 0" />
+            <mass value="1.0604" />
+            <inertia ixx="0.00049116" ixy="5.47E-06" ixz="6.4E-07" iyy="0.01580055" iyz="1.04E-06" izz="0.01574902" />
         </inertial>
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -69,7 +66,7 @@
                 <mesh filename="package://airbot_play_v1/meshes/link2.STL" />
             </geometry>
             <material name="">
-                <color rgba="0.25098 0.25098 0.25098 1" />
+                <color rgba="0.75294 0.75294 0.75294 1" />
             </material>
         </visual>
         <collision>
@@ -80,17 +77,17 @@
         </collision>
     </link>
     <joint name="joint2" type="revolute">
-        <origin xyz="0 0 0.0402" rpy="-1.5708 0.0016463 3.1416" />
+        <origin xyz="0 0 0" rpy="-1.5708 0 3.1416" />
         <parent link="link1" />
         <child link="link2" />
         <axis xyz="0 0 1" />
-        <limit lower="-10" upper="10" effort="100" velocity="1000" />
+        <limit lower="-10" upper="10" effort="100" velocity="110" />
     </joint>
     <link name="link3">
         <inertial>
-            <origin xyz="0.18498 0.0096239 8.209E-05" rpy="0 0 0" />
-            <mass value="0.55615" />
-            <inertia ixx="3.6463748E-04" ixy="-4.7568977E-04" ixz="-9.61418E-06" iyy="4.59290981E-03" iyz="-1.90857E-06" izz="4.61730434E-03" />
+            <origin xyz="0.18065 0.0086528 0.0017767" rpy="0 0 0" />
+            <mass value="0.55999" />
+            <inertia ixx="0.00044245" ixy="-0.00043669" ixz="-9.35E-06" iyy="0.0052357" iyz="-9.31E-06" izz="0.0052474" />
         </inertial>
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -109,17 +106,17 @@
         </collision>
     </link>
     <joint name="joint3" type="revolute">
-        <origin xyz="0.264 0 0" rpy="0 0 -2.9169" />
+        <origin xyz="0.264 0 0" rpy="0 0 -2.9159" />
         <parent link="link2" />
         <child link="link3" />
         <axis xyz="0 0 1" />
-        <limit lower="-10" upper="10" effort="100" velocity="1000" />
+        <limit lower="-10" upper="10" effort="100" velocity="110" />
     </joint>
     <link name="link4">
         <inertial>
-            <origin xyz="0.05354 -0.0002508 -0.00056729" rpy="0 0 0" />
-            <mass value="0.35037" />
-            <inertia ixx="1.1078784E-04" ixy="5.68483E-06" ixz="-1.778429E-05" iyy="2.1478415E-04" iyz="-6.32521E-06" izz="1.6720967E-04" />
+            <origin xyz="0.054496 -0.0020302 0.0011432" rpy="0 0 0" />
+            <mass value="0.34333" />
+            <inertia ixx="0.00017672" ixy="2.2E-06" ixz="-1.227E-05" iyy="0.00026353" iyz="-5.14E-06" izz="0.00022296" />
         </inertial>
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -127,7 +124,7 @@
                 <mesh filename="package://airbot_play_v1/meshes/link4.STL" />
             </geometry>
             <material name="">
-                <color rgba="0.89804 0.91765 0.92941 1" />
+                <color rgba="0.75294 0.75294 0.75294 1" />
             </material>
         </visual>
         <collision>
@@ -138,17 +135,17 @@
         </collision>
     </link>
     <joint name="joint4" type="revolute">
-        <origin xyz="0.25132 0 0" rpy="0 0 -0.22636" />
+        <origin xyz="0.25137 0 -0.002" rpy="0 0 -0.22569" />
         <parent link="link3" />
         <child link="link4" />
         <axis xyz="0 0 1" />
-        <limit lower="-10" upper="10" effort="100" velocity="1000" />
+        <limit lower="-10" upper="10" effort="100" velocity="110" />
     </joint>
     <link name="link5">
         <inertial>
-            <origin xyz="0.051613 -0.00072588 -0.00061659" rpy="0 0 0" />
-            <mass value="0.33138" />
-            <inertia ixx="3.1443063E-04" ixy="3.6082E-07" ixz="-7.6431E-07" iyy="2.9391628E-04" iyz="-1.8877E-07" izz="2.9233995E-04" />
+            <origin xyz="-0.00042679 0.053307 0.00073106" rpy="0 0 0" />
+            <mass value="0.33126" />
+            <inertia ixx="0.00040201" ixy="1.6E-06" ixz="-5.07E-06" iyy="0.00042082" iyz="1.75E-06" izz="0.00036657" />
         </inertial>
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -156,7 +153,7 @@
                 <mesh filename="package://airbot_play_v1/meshes/link5.STL" />
             </geometry>
             <material name="">
-                <color rgba="0.41176 0.41176 0.41176 1" />
+                <color rgba="0.75294 0.75294 0.75294 1" />
             </material>
         </visual>
         <collision>
@@ -167,25 +164,37 @@
         </collision>
     </link>
     <joint name="joint5" type="revolute">
-        <origin xyz="0.06 -0.0005 -0.002" rpy="-1.5708 -0.0025284 0" />
+        <origin xyz="0.06 0 0" rpy="-1.5708 -1.5708 0" />
         <parent link="link4" />
         <child link="link5" />
         <axis xyz="0 0 1" />
-        <limit lower="-10" upper="10" effort="100" velocity="1000" />
+        <limit lower="-10" upper="10" effort="100" velocity="110" />
     </joint>
-    <link name="link6">
+    <link name="gripper_link">
         <inertial>
             <origin xyz="0 0 0" rpy="0 0 0" />
-            <mass value="1E-09" />
-            <inertia ixx="1E-09" ixy="1E-09" ixz="1E-09" iyy="1E-09" iyz="1E-09" izz="1E-09" />
+            <mass value="1E-15" />
+            <inertia ixx="1E-11" ixy="1E-15" ixz="1E-15" iyy="1E-11" iyz="1E-15" izz="1E-11" />
         </inertial>
     </link>
     <joint name="joint6" type="revolute">
-        <origin xyz="0.075 0 0" rpy="0 0 0" />
+        <origin xyz="0 0 0" rpy="-1.5708 0 0" />
         <parent link="link5" />
-        <child link="link6" />
-        <axis xyz="1 0 0" />
+        <child link="gripper_link" />
+        <axis xyz="0 0 1" />
         <limit lower="-10" upper="10" effort="100" velocity="1000" />
+    </joint>
+    <link name="custom_end_link">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <mass value="1E-15" />
+            <inertia ixx="1E-11" ixy="1E-15" ixz="1E-15" iyy="1E-11" iyz="1E-15" izz="1E-11" />
+        </inertial>
+    </link>
+    <joint name="joint_custom_end" type="fixed">
+        <origin xyz="0 0 0.078" rpy="1.5708 -1.5708 0" />
+        <parent link="gripper_link" />
+        <child link="custom_end_link" />
     </joint>
     <transmission name="trans_joint1">
         <type>transmission_interface/SimpleTransmission</type>

@@ -1,5 +1,5 @@
-stomp/arx5_arm:
-  group_name: arx5_arm
+stomp/airbot_play_arm:
+  group_name: airbot_play_arm
   optimization:
     num_timesteps: 60
     num_iterations: 40
