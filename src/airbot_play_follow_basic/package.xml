@@ -15,5 +15,6 @@
   <buildtool_depend>catkin</buildtool_depend>
   <run_depend>moveit</run_depend>
   <run_depend>trac_ik</run_depend>
+  <run_depend>joint_trajectory_controller</run_depend>
 
 </package>

@@ -1,4 +1,16 @@
 # Publish joint_states
 joint_state_controller:
   type: joint_state_controller/JointStateController
-  publish_rate: 50
+  publish_rate: 200
+
+# gazebo_ros_control/pid_gains:  # 添加这部分内容可以防止报红色的pid错误，但是pid参数需要仔细调节，否则无法正常使用机械臂
+#   joint1: {p: 0.35,  d: 0, i: 0, i_clamp: 0}
+#   joint2: {p: 0.35,  d: 0, i: 0, i_clamp: 0}
+#   joint3: {p: 0.35,  d: 0, i: 0, i_clamp: 0}
+#   joint4: {p: 0.35,  d: 0, i: 0, i_clamp: 0}
+#   joint5: {p: 0.35,  d: 0, i: 0, i_clamp: 0}
+#   joint6: {p: 0.35,  d: 0, i: 0, i_clamp: 0}
+#   joint_gripper10: {p: 0.35,  d: 0, i: 0, i_clamp: 0}
+#   joint_gripper11: {p: 0.35,  d: 0, i: 0, i_clamp: 0}
+#   joint_gripper20: {p: 0.35,  d: 0, i: 0, i_clamp: 0}
+#   joint_gripper21: {p: 0.35,  d: 0, i: 0, i_clamp: 0}

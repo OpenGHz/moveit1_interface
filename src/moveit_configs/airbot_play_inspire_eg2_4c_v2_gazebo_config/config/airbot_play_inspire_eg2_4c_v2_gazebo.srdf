@@ -46,7 +46,7 @@
         <joint name="joint_gripper21" value="-0.8"/>
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="inspire_eg2_4c" parent_link="gripper_link" group="airbot_play_gripper"/>
+    <end_effector name="inspire_eg2_4c" parent_link="custom_end_link" group="airbot_play_gripper"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="base_link" link2="link1" reason="Adjacent"/>
     <disable_collisions link1="gripper_link" link2="gripper_link10" reason="Adjacent"/>
