@@ -59,11 +59,11 @@
         <joint name="joint_gripper20" value="0.4"/>
         <joint name="joint_gripper21" value="-0.4"/>
     </group_state>
-    <group_state name="close_near" group="airbot_play_gripper">
-        <joint name="joint_gripper10" value="-0.57"/>
-        <joint name="joint_gripper11" value="0.57"/>
-        <joint name="joint_gripper20" value="0.57"/>
-        <joint name="joint_gripper21" value="-0.57"/>
+    <group_state name="pick_big_cube" group="airbot_play_gripper">
+        <joint name="joint_gripper10" value="-0.21"/>
+        <joint name="joint_gripper11" value="0.21"/>
+        <joint name="joint_gripper20" value="0.21"/>
+        <joint name="joint_gripper21" value="-0.21"/>
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="inspire_eg2_4c" parent_link="custom_end_link" group="airbot_play_gripper"/>
