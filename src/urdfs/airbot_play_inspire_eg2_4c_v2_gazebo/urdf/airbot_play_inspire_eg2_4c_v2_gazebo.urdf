@@ -433,6 +433,38 @@
             <!-- <robotParam>/airbot_play/robot_description</robotParam> -->
         </plugin>
     </gazebo>
+    <!-- Improve grasping physics -->
+    <gazebo reference="gripper_link11">
+      <ode>
+        <kp>1000000.0</kp>
+        <kd>1.0</kd>
+        <mu1>100.0</mu1>
+        <mu2>100.0</mu2>
+        <minDepth>0.001</minDepth>
+      </ode>
+    </gazebo>
+    <gazebo reference="gripper_link21">
+      <ode>
+        <kp>1000000.0</kp>
+        <kd>1.0</kd>
+        <mu1>100.0</mu1>
+        <mu2>100.0</mu2>
+        <minDepth>0.001</minDepth>
+      </ode>
+    </gazebo>
+  <!-- Gazebo grasping plugin -->
+  <gazebo>
+    <gripper name="gazebo_gripper">
+      <grasp_check>
+        <attach_steps>2</attach_steps>    <!-- default: 20 -->
+        <detach_steps>2</detach_steps>    <!-- default: 40 -->
+        <min_contact_count>3</min_contact_count>
+      </grasp_check>
+      <gripper_link>gripper_link11</gripper_link>
+      <gripper_link>gripper_link21</gripper_link>
+      <palm_link>gripper_link</palm_link>
+    </gripper>
+  </gazebo>
   <!-- ROS base_link to UR 'Base' Coordinates transform -->
   <link name="base"/>
   <joint name="base_link-base_fixed_joint" type="fixed">

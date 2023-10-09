@@ -1,3 +1,5 @@
+<?xml version="1.0" ?>
+
 <sdf version='1.7'>
   <world name='default'>
     <scene>
@@ -578,12 +580,12 @@
         <inertial>
           <mass>0.03</mass>
           <inertia>
-            <ixx>0.00066667</ixx>
+            <ixx>2.3541666666666672e-05</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>0.00066667</iyy>
+            <iyy>2.3541666666666672e-05</iyy>
             <iyz>0</iyz>
-            <izz>0.00066667</izz>
+            <izz>2.3541666666666672e-05</izz>
           </inertia>
           <pose>0 0 0 0 -0 0</pose>
         </inertial>
@@ -620,20 +622,16 @@
           <surface>
             <friction>
               <ode>
-                <mu>1</mu>
-                <mu2>1</mu2>
+                <mu>5</mu>
+                <mu2>5</mu2>
                 <fdir1>0 0 0</fdir1>
                 <slip1>0</slip1>
                 <slip2>0</slip2>
               </ode>
               <torsional>
-                <coefficient>1</coefficient>
-                <patch_radius>0</patch_radius>
-                <surface_radius>0</surface_radius>
-                <use_patch_radius>1</use_patch_radius>
-                <ode>
-                  <slip>0</slip>
-                </ode>
+                <coefficient>1.0</coefficient>
+                <use_patch_radius>0</use_patch_radius>
+                <surface_radius>0.05</surface_radius>
               </torsional>
             </friction>
             <bounce>
@@ -645,12 +643,10 @@
               <collide_without_contact_bitmask>1</collide_without_contact_bitmask>
               <collide_bitmask>1</collide_bitmask>
               <ode>
-                <soft_cfm>0</soft_cfm>
-                <soft_erp>0.2</soft_erp>
-                <kp>1e+13</kp>
+                <kp>100000</kp>
                 <kd>1</kd>
-                <max_vel>0.01</max_vel>
-                <min_depth>0</min_depth>
+                <max_vel>1.0</max_vel>
+                <min_depth>0.001</min_depth>
               </ode>
               <bullet>
                 <split_impulse>1</split_impulse>
