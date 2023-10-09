@@ -343,7 +343,7 @@ if __name__ == '__main__':
     loginfo("Initializing {} node.".format(NODE_NAME))
     action_name = rospy.get_param('~action_name',default='arm_position_controller/follow_joint_trajectory')
     interpolation_type = rospy.get_param('~interpolation_type',default=5)
-    MoveItAction(action_name,MoveItAction.CONTROL_MODE[1],interpolation=interpolation_type)
+    MoveItAction(action_name,interpolation=interpolation_type)
 
     rospy.loginfo("Ready to follow joint trajectory.")
     rospy.spin()
