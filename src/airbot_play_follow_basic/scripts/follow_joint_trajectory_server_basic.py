@@ -6,7 +6,7 @@ from actionlib import SimpleActionServer
 
 from scipy.interpolate   import CubicSpline,make_interp_spline,interp1d
 from control_msgs.msg    import FollowJointTrajectoryGoal
-from control_msgs.msg    import FollowJointTrajectoryAction
+from control_msgs.msg    import FollowJointTrajectoryAction, FollowJointTrajectoryResult
 from trajectory_msgs.msg import JointTrajectoryPoint
 from typing import List,Union
 
@@ -18,6 +18,7 @@ from sensor_msgs.msg import JointState
 
 class MoveItAction(object):
     CONTROL_MODE = ['torque','position']  # 控制模式选择
+    _result = FollowJointTrajectoryResult()
 	# Action initialisation
     def __init__(self,name,interpolation=5):
         """
