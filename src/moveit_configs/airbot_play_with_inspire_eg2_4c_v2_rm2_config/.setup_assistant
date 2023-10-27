@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: airbot_play_with_rm2_urdf
+    relative_path: urdf/airbot_play_with_rm2_urdf.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/airbot_play_with_rm2.srdf
+  CONFIG:
+    author_name: GHz
+    author_email: 13416464@qq.com
+    generated_timestamp: 1698416588
