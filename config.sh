@@ -39,12 +39,8 @@ pip3 install scipy || { echo -e "${FAILED}scipy install failed.${DEF}" && exit 0
 # install catkin tools
 sudo apt-get install python3-catkin-tools 2> /dev/null || pip3 install catkin-tools catkin-tools-python 2> /dev/null
 
-# build the ros workspace
-catkin clean -y 2> /dev/null
-catkin build || { echo -e "${FAILED}ROS workspace build failed.${DEF}" && exit 0; }
-
-# auto modify the .bashrs or .zshrc file
-echo "source $(pwd)/devel/setup.${shtype}" >> ~/."${name}"
+# install inner python packages
+pip install ./src/airbot_play_follow_basic
 
 # OK
 if [ "$rosdepwarn" == 1 ];then echo -e "${OK}ROS config OK with warning.${DEF}"
