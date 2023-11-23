@@ -66,4 +66,17 @@ if __name__ == "__main__":
         req.target_pose.pose.position.z += 0.1
         res:airbot_play_ikResponse = client.call(req)
         print("ik响应为：",res.result)
+
+    # 发布末端位姿话题
+    from geometry_msgs.msg import PoseStamped
+    eef_pose_pub = rospy.Publisher("/airbot_play/current_pose", PoseStamped, queue_size=1)
+    def publish_eef_pose():
+        rt = rospy.Rate(200)
+        while True:
+            eef_pose =  mc.get_current_pose()
+            eef_pose_pub.publish(eef_pose)
+            rt.sleep()
+    from threading import Thread
+    Thread(target=publish_eef_pose,daemon=True).start()
+
     rospy.spin()
