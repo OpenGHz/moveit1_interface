@@ -17,6 +17,14 @@ if [ "${ROS_ROOT}" == "" ];then
 	fi
 fi
 
+# install useful robot tools such as interpolation, coordinate transformation, etc.
+git clone --depth 1 https://github.com/OpenGHz/robot_tools.git
+pip install ./robot_tools && rm -rf robot_tools
+# install the required python packages
+pip3 install scipy || { echo -e "${FAILED}scipy install failed.${DEF}" && exit 0; }
+# install inner python packages
+pip install ./src/airbot_play_follow_basic
+
 # if there is a conda environment then deacticate it, which is only effecive in this .sh script
 if [ -d ~/anaconda3/etc/profile.d/ ] && [ "${CONDA_DEFAULT_ENV}" != "" ];then
 	#shellcheck source=~/anaconda3/etc/profile.d/conda.sh
@@ -33,14 +41,8 @@ fi
 { { sudo rosdepc init > /dev/null 2>&1 || rosdepc init > /dev/null; } && rosdepc update; } > /dev/null || { echo -e "${FAILED}rosdepc failed to be ready.${DEF}" && exit 0; }
 rosdep install --from-path src --ignore-src -r -y || { echo -e "${WARN}rosdep install failed(not complete), please check your rosdep.${DEF}";rosdepwarn=1; }
 
-# install the required python packages
-pip3 install scipy || { echo -e "${FAILED}scipy install failed.${DEF}" && exit 0; }
-
 # install catkin tools
 sudo apt-get install python3-catkin-tools 2> /dev/null || pip3 install catkin-tools catkin-tools-python 2> /dev/null
-
-# install inner python packages
-pip install ./src/airbot_play_follow_basic
 
 # OK
 if [ "$rosdepwarn" == 1 ];then echo -e "${OK}ROS config OK with warning.${DEF}"
