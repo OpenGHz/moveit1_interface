@@ -25,13 +25,6 @@ pip3 install scipy || { echo -e "${FAILED}scipy install failed.${DEF}" && exit 0
 # install inner python packages
 pip install ./src/airbot_play_follow_basic
 
-# if there is a conda environment then deacticate it, which is only effecive in this .sh script
-if [ -d ~/anaconda3/etc/profile.d/ ] && [ "${CONDA_DEFAULT_ENV}" != "" ];then
-	#shellcheck source=~/anaconda3/etc/profile.d/conda.sh
-	source ~/anaconda3/etc/profile.d/conda.sh
-	conda deactivate
-fi
-
 # install the required ROS packages through rosdep
 sudo pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple rosdepc || { echo -e "${FAILED}Failed to install rosdepc, please try to use this cmd to install again: echo 3 | { wget http://fishros.com/install -O fishros && bash fishros; }.${DEF}" && exit 0; }
 output=$(rosdepc init 2>&1)
