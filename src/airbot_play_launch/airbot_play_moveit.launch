@@ -1,30 +1,36 @@
 <launch>
 
-  <!-- 参数配置 -->
+  <!-- parameters config -->
   <arg name="fake_control" default="false" />
-  <arg name="use_sim"      default="false" />
   <arg name="use_rviz"     default="false" />
-  <arg name="drag"         default="false" />
-  <arg name="use_sim_time" default="false" />
   <arg name="target_moveit_config" default="airbot_play_inspire_eg2_4c_v2_arm_group_config"/>
   <arg name="use_basic" default="true"/>
-  <!-- 设置使用仿真时间全局参数 -->
+  <arg name="publish_robot_state" default="true" doc="whether start the robot_state_publisher"/>
+  <arg name="virtual_tf" default="none" doc="if not none, specify the name of the link connected to world"/>
+  <arg name="load_robot_description" default="true" doc="whether load planning context robot_description"/>
+  <arg name="pipeline" default="ompl" doc="specify the planning pipeline"/>
+
+  <!-- set to use sim time -->
+  <arg name="use_sim_time" default="false" />
   <param if="$(arg use_sim_time)" name="/use_sim_time" type="bool" value="true" />
 
-  <!-- 带airbot_play命名空间启动 -->
+  <!-- start moveit with airbot_play name space -->
   <group ns="airbot_play">
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-    <!-- moveit controller server -->
+    <!-- start robot state publisher -->
+    <node if="$(arg publish_robot_state)" name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <!-- start moveit controller server -->
     <node if="$(arg use_basic)" pkg="airbot_play_follow_basic" type="follow_joint_trajectory_server_basic.py" name="follow_joint_trajectory_server" output="screen">
     </node>
     <node unless="$(arg use_basic)" pkg="airbot_play_control_upper" type="airbot_play_follow_joint_trajectory_server.py" name="follow_joint_trajectory_server" output="screen">
-      <param name="drag" type="bool" value="$(arg drag)" unless="$(arg fake_control)"/>
     </node>
-    <!-- demo启动 -->
+    <!-- demo start -->
     <include file="$(find airbot_play_launch)/airbot_play_demo.launch">
       <arg if="$(arg fake_control)" name="use_rviz" value="true"/>
       <arg unless="$(arg fake_control)" name="use_rviz" value="$(arg use_rviz)"/>
       <arg name="target_moveit_config" value="$(arg target_moveit_config)"/>
+      <arg name="virtual_tf" value="$(arg virtual_tf)"/>
+      <arg name="load_robot_description" value="$(arg load_robot_description)"/>
+      <arg name="pipeline" value="$(arg pipeline)"/>
     </include>
   </group>
 

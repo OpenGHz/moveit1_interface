@@ -1,0 +1,17 @@
+<launch>
+
+  <!-- <rosparam param="test_des" subst_value="True">$(eval eval("_"+"_import_"+"_('subprocess')").check_output(eval("['rosparam','get','robot_description']")).strip() )</rosparam> -->
+  <arg name="node_name" default="$(anon robot_state_publisher)" doc="the name the robot_state_publisher node"/>
+  <arg name="robot_description_path" doc="the path to your robot description"/>
+  <arg name="publish_frequency" default="50.0" doc="the frequency of publishing the tf"/>
+  <arg name="name_sapce" default="airbot" doc="the name space of the robot_state_publisher node"/>
+
+  <!-- robot tf publish -->
+  <group ns="$(arg name_sapce)">
+    <param name="robot_description" textfile="$(arg robot_description_path)"/>
+    <node name="$(arg node_name)" pkg="robot_state_publisher" type="robot_state_publisher">
+      <param name="publish_frequency" type="double" value="$(arg publish_frequency)"/>
+    </node>
+  </group>
+
+</launch>
