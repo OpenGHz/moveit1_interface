@@ -2,12 +2,12 @@
 
   <arg name="target_moveit_config" default="airbot_play_inspire_eg2_4c_v2_arm_group_config"/>
   <arg name="use_rviz" default="false"/>
-  <!-- specify the planning pipeline -->
-  <arg name="pipeline" default="ompl"/>
+  <arg name="virtual_tf" default="none" doc="if not none, specify the name of the link connected to world"/>
+  <arg name="pipeline" default="ompl" doc="specify the planning pipeline"/>
   <!-- If needed, broadcast static tf for robot root -->
-  <node pkg="tf2_ros" type="static_transform_publisher" name="virtual_joint_broadcaster_0" args="0 0 0 0 0 0 world base_link"/>
+  <node if="$(eval arg('virtual_tf') != 'none')" pkg="tf2_ros" type="static_transform_publisher" name="virtual_joint_broadcaster_world_to_$(arg virtual_tf)" args="0 0 0 0 0 0 world $(arg virtual_tf)"/>
   <!-- 目标config文件指定 -->
-  <arg name="dir_name" value="$(dirname)"/> <!-- 指向当年目录 -->
+  <arg name="dir_name" value="$(dirname)"/> <!-- 指向当前目录 -->
   <arg name="to_be_replace" default="$(eval arg('dir_name').rsplit('/',2)[-1])"/>
   <arg name="replaced" default=""/>
   <arg name="parent_path" value="$(eval arg('dir_name').replace(arg('to_be_replace'),arg('replaced')))"/>
