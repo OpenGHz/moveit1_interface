@@ -1,0 +1,11 @@
+<launch>
+
+<arg name="node_name" default="$(anon robot_state_publisher)" doc="the name the robot_state_publisher node"/>
+<arg name="xyz_ypr" default="0 0 0 0 0 0" doc="the static tranform of two links"/>
+<arg name="frame_id" default="arm_base" doc="the name of the parent link"/>
+<arg name="child_frame_id" default="base_link" doc="the name of the child link"/>
+<arg name="period_in_ms" default="100" doc="the tf publish period in ms, 10 Hz is good"/>
+
+<node pkg="tf2_ros" type="static_transform_publisher" name="$(arg node_name)" args="$(arg xyz_ypr) $(arg frame_id) $(arg child_frame_id)"/>
+
+</launch>
