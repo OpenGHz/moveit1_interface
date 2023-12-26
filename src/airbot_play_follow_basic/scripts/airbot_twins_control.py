@@ -61,13 +61,21 @@ joint_cmd.name = [
     "right_joint5",
     "right_joint6",
 ]
-joint_cmd.header.frame_id = "airbot_twins"
+joint_cmd.header.frame_id = "success"
+
+success_dict = {
+    0x00: "success",
+    0x01: "right_faild",
+    0x10: "left_faild",
+    0x11: "both_faild",
+}
 
 
 def arm_ik_position_callback(cmd_msg: Twist):
     global last_twins_cmd, arm_joint_pos_target
     if last_twins_cmd == cmd_msg:
         return
+    failure = 0x00
     left_position = [cmd_msg.linear.x, cmd_msg.linear.y, cmd_msg.linear.z]
     right_position = [cmd_msg.angular.x, cmd_msg.angular.y, cmd_msg.angular.z]
     if left_position == [0, 0, 0]:
@@ -77,8 +85,9 @@ def arm_ik_position_callback(cmd_msg: Twist):
         plan_success, traj, planning_time, error_code = airbot_twins_left.plan()
         airbot_twins_left.clear_pose_targets()
     if plan_success:
-        left_target = traj.joint_trajectory.points[-1].positions
+        left_target = list(traj.joint_trajectory.points[-1].positions)
     else:
+        failure = 0x10
         left_target = arm_joint_pos_target[0:6]
         print("left ik failed with target:", left_position)
     if right_position == [0, 0, 0]:
@@ -88,10 +97,12 @@ def arm_ik_position_callback(cmd_msg: Twist):
         plan_success, traj, planning_time, error_code = airbot_twins_right.plan()
         airbot_twins_right.clear_pose_targets()
     if plan_success:
-        right_target = traj.joint_trajectory.points[-1].positions
+        right_target = list(traj.joint_trajectory.points[-1].positions)
     else:
+        failure += 0x01
         right_target = arm_joint_pos_target[6:12]
         print("right ik failed with target:", right_position)
+    joint_cmd.header.frame_id = success_dict[failure]
     arm_joint_pos_target = left_target + right_target
     last_twins_cmd = cmd_msg
 
