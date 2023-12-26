@@ -43,6 +43,8 @@ rospy.init_node("airbot_twins_control")
 
 airbot_twins_left = MoveGroupCommander("airbot_play_left_arm")
 airbot_twins_right = MoveGroupCommander("airbot_play_right_arm")
+airbot_twins_left.set_pose_reference_frame("body_link")
+airbot_twins_right.set_pose_reference_frame("body_link")
 last_twins_cmd = Twist()
 joint_cmd_puber = rospy.Publisher(joint_cmd_topic, JointState, queue_size=1)
 arm_joint_pos_target = [0] * 12
