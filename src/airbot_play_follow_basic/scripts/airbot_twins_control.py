@@ -28,11 +28,29 @@ parser.add_argument(
     help="topic name of joint cmd, the type should be sensor_msgs/JointState",
 )
 
+parser.add_argument(
+    "-pt",
+    "--planning_time",
+    type=float,
+    default=2,
+    help="specify the amount of time to be used for motion planning",
+)
+
+parser.add_argument(
+    "-pa",
+    "--num_planning_attempts",
+    type=int,
+    default=1,
+    help="set the number of times the motion plan is to be computed from scratch before the shortest solution is returned",
+)
+
 args, unknown = parser.parse_known_args()
 
 target_position_topic = args.target_position_topic
 joint_cmd_topic = args.joint_cmd_topic
 target_pose_topic = args.target_pose_topic
+planning_time = args.planning_time
+num_planning_attempts = args.num_planning_attempts
 
 from moveit_commander import MoveGroupCommander
 import rospy
@@ -45,6 +63,10 @@ airbot_twins_left = MoveGroupCommander("airbot_play_left_arm")
 airbot_twins_right = MoveGroupCommander("airbot_play_right_arm")
 airbot_twins_left.set_pose_reference_frame("body_link")
 airbot_twins_right.set_pose_reference_frame("body_link")
+airbot_twins_left.set_planning_time(planning_time)
+airbot_twins_left.set_num_planning_attempts(num_planning_attempts)
+airbot_twins_right.set_planning_time(planning_time)
+airbot_twins_right.set_num_planning_attempts(num_planning_attempts)
 last_twins_cmd = Twist()
 joint_cmd_puber = rospy.Publisher(joint_cmd_topic, JointState, queue_size=1)
 arm_joint_pos_target = [0] * 12
@@ -85,6 +107,7 @@ def arm_ik_position_callback(cmd_msg: Twist):
         plan_success = False
     else:
         airbot_twins_left.set_position_target(left_position)
+        joint_cmd.header.frame_id = "planning"
         plan_success, traj, planning_time, error_code = airbot_twins_left.plan()
         airbot_twins_left.clear_pose_targets()
         print("left ik success with planning time:", planning_time, "seconds")
@@ -99,6 +122,7 @@ def arm_ik_position_callback(cmd_msg: Twist):
         plan_success = False
     else:
         airbot_twins_right.set_position_target(right_position)
+        joint_cmd.header.frame_id = "planning"
         plan_success, traj, planning_time, error_code = airbot_twins_right.plan()
         airbot_twins_right.clear_pose_targets()
         print("right ik success with planning time:", planning_time, "seconds")
