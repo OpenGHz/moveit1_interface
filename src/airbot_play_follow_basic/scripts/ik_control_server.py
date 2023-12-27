@@ -48,7 +48,7 @@ class IkControlServer(MoveItBasicController):
                     break
                 elif attempts_plan <= 0:
                     rospy.logerr(
-                        f"Planning failed after {attempts_plan} attempts with target: {req.target_pose.pose}."
+                        f"Planning failed after {attempts_plan} attempts with target:\n {req.target_pose.pose}."
                     )
                     break
                 else:
@@ -58,7 +58,7 @@ class IkControlServer(MoveItBasicController):
                 break
         else:
             rospy.logerr(
-                f"IK failed after {attempts_ik} attempts with target {req.target_pose.pose}."
+                f"IK failed after {attempts_ik} attempts with target:\n {req.target_pose.pose}."
             )
         response.result = success
         return response
