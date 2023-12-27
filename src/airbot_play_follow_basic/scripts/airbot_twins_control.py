@@ -86,6 +86,7 @@ joint_cmd.name = [
     "right_joint6",
 ]
 joint_cmd.header.frame_id = "success"
+joint_cmd.position = (0,) * 12
 
 success_dict = {
     0x00: "success",
@@ -96,7 +97,7 @@ success_dict = {
 
 
 def arm_ik_position_callback(cmd_msg: Twist):
-    global last_twins_cmd, arm_joint_pos_target
+    global last_twins_cmd
     if last_twins_cmd == cmd_msg:
         return
     failure = 0x00
@@ -115,7 +116,7 @@ def arm_ik_position_callback(cmd_msg: Twist):
         left_target = list(traj.joint_trajectory.points[-1].positions)
     else:
         failure = 0x10
-        left_target = arm_joint_pos_target[0:6]
+        left_target = list(joint_cmd.position)[0:6]
         print("left ik failed with target:", left_position)
     # right arm
     if right_position == [0, 0, 0]:
@@ -130,10 +131,11 @@ def arm_ik_position_callback(cmd_msg: Twist):
         right_target = list(traj.joint_trajectory.points[-1].positions)
     else:
         failure += 0x01
-        right_target = arm_joint_pos_target[6:12]
+        right_target = list(joint_cmd.position)[6:12]
         print("right ik failed with target:", right_position)
     joint_cmd.header.frame_id = success_dict[failure]
-    arm_joint_pos_target = left_target + right_target
+    joint_cmd.position = tuple(left_target + right_target)
+    joint_cmd.header.stamp = rospy.Time.now()
     last_twins_cmd = cmd_msg
 
 
@@ -196,7 +198,26 @@ while last_twins_cmd == Twist():
 
 rate = rospy.Rate(10)
 while not rospy.is_shutdown():
-    joint_cmd.position = arm_joint_pos_target
-    joint_cmd.header.stamp = rospy.Time.now()
     joint_cmd_puber.publish(joint_cmd)
     rospy.sleep(0.1)
+
+""" An example of receiving ik result """
+RECEIVE_EXAMLPE = False
+if RECEIVE_EXAMLPE:
+    joint = JointState()
+    joint_last = JointState()
+
+    def callback(msg: JointState):
+        global joint
+        joint = msg
+
+    joint_cmd_suber = rospy.Subscriber("/airbot_play/joint_cmd", JointState, callback)
+    pose_cmd_puber = rospy.Publisher(
+        "/airbot_twins/pose_cmd", PoseStamped, queue_size=1
+    )
+    # wait for the target to be computed
+    while joint.header.stamp == joint_last.header.stamp:
+        target_pose = PoseStamped()
+        pose_cmd_puber.publish(target_pose)
+    # over
+    joint_last = joint
