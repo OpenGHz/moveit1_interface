@@ -9,7 +9,7 @@ from moveit_msgs.srv import (
 from geometry_msgs.msg import Pose
 from sensor_msgs.msg import JointState
 import rospy
-from typing import Tuple
+from typing import Tuple, Union
 
 
 class MoveItBasicController(MoveGroupCommander):
@@ -100,8 +100,8 @@ class MoveItBasicController(MoveGroupCommander):
     #     else:
     #         raise Exception(f"IK service failed with error code: {ik_response.error_code.val}")
 
-    def compute_inverse_kinematics(self, pose: tuple, approximate=False) -> tuple:
-        """逆运动学：将pose(x,y,z,x,y,z,w)转换为joint角度目标"""
+    def compute_inverse_kinematics(self, pose: tuple, approximate=False) -> Union[tuple, None]:
+        """逆运动学：将pose(x,y,z,x,y,z,w)转换为joint角度目标；如果失败，将打印错误信息并返回None"""
         pose_type = Pose()
         pose_type.position.x, pose_type.position.y, pose_type.position.z = pose[:3]
         (
@@ -110,14 +110,19 @@ class MoveItBasicController(MoveGroupCommander):
             pose_type.orientation.z,
             pose_type.orientation.w,
         ) = pose[3:]
+        # if not ever set, the default value is all zero
         joints_target_last = list(self.get_joint_value_target())
         eef_link = self.get_end_effector_link()
         # if eef_link == "":
         #     print("No end effector link specified. Using the last link instead")
         #     eef_link = self.get_link_names()[-1]
-        self.set_joint_value_target(pose_type, eef_link, approximate)
-        joints_value = tuple(self.get_joint_value_target())
-        self.set_joint_value_target(joints_target_last)
+        try:
+            self.set_joint_value_target(pose_type, eef_link, approximate)
+        except Exception as e:
+            joints_value = None
+        else:
+            joints_value = self.get_joint_value_target()
+            self.set_joint_value_target(joints_target_last)
         return joints_value
 
     def __tuple_to_pose(self, pose: tuple) -> Pose:

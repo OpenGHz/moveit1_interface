@@ -7,6 +7,7 @@ from airbot_play_ik_service.srv import (
     airbot_play_ikResponse,
 )
 import rospy
+from moveit_commander import conversions
 
 
 class IkControlServer(MoveItBasicController):
@@ -17,8 +18,12 @@ class IkControlServer(MoveItBasicController):
     ):
         super().__init__(name, robot_description, ns, wait_for_servers)
         self.ik_server = rospy.Service(
-            f"/{ns}/ik_service", airbot_play_ik, self._handle_ik
+            f"{ns}/ik_service", airbot_play_ik, self._handle_ik
         )
+        self._no_plan = False
+
+    def no_plan(self):
+        self._no_plan = True
 
     def _handle_ik(self, req: airbot_play_ikRequest):
         response = airbot_play_ikResponse()
@@ -26,32 +31,35 @@ class IkControlServer(MoveItBasicController):
         attempts_plan = 20
         success = 0
         while attempts_ik > 0:
-            try:
-                attempts_ik -= 1
-                self.set_pose_target(req.target_pose.pose)
-            except:
+            attempts_ik -= 1
+            joint_target = self.compute_inverse_kinematics(
+                tuple(conversions.pose_to_list(req.target_pose.pose))
+            )
+            if joint_target is None:
                 continue
-            else:
-                attempts_ik = 20
+            elif not self._no_plan:
+                attempts_ik = 20  # reset attempts_ik
                 attempts_plan -= 1
                 # `go()` returns a boolean indicating whether the planning and execution was successful.
-                if self.go(wait=True):
+                if self.go(joint_target, wait=True):
                     # Calling `stop()` ensures that there is no residual movement
                     self.stop()
-                    # It is always good to clear your targets after planning with poses.
-                    # Note: there is no equivalent function for clear_joint_value_targets().
-                    self.clear_pose_targets()
                     success = 1
                     break
                 elif attempts_plan <= 0:
                     rospy.logerr(
-                        f"Planning failed with target: {req.target_pose.pose}."
+                        f"Planning failed after {attempts_plan} attempts with target: {req.target_pose.pose}."
                     )
                     break
                 else:
                     continue
+            else:
+                success = 1
+                break
         else:
-            rospy.logerr(f"IK failed with target {req.target_pose.pose}.")
+            rospy.logerr(
+                f"IK failed after {attempts_ik} attempts with target {req.target_pose.pose}."
+            )
         response.result = success
         return response
 
@@ -72,7 +80,7 @@ if __name__ == "__main__":
         "--robot_description",
         type=str,
         default="/airbot_play/robot_description",
-        help="name of robot description",
+        help="name of robot description param name, the name space won't be auto added to it",
     )
     parser.add_argument(
         "-ns",
@@ -88,6 +96,7 @@ if __name__ == "__main__":
         default="auto",
         help="pose reference frame",
     )
+    parser.add_argument("-p", "--use_plan", action="store_true", help="test mode")
     parser.add_argument("-t", "--test", action="store_true", help="test mode")
     args, unknown = parser.parse_known_args()
 
@@ -98,12 +107,14 @@ if __name__ == "__main__":
     mc = IkControlServer(args.group_name, args.robot_description, args.name_space)
     if args.pose_reference_frame != "auto":
         mc.set_pose_reference_frame(args.pose_reference_frame)
+    if not args.use_plan:
+        mc.no_plan()
     if args.test:
-        client = rospy.ServiceProxy(f"/{args.name_space}/ik_service", airbot_play_ik)
+        client = rospy.ServiceProxy(f"{args.name_space}/ik_service", airbot_play_ik)
         client.wait_for_service(timeout=5)
         req = airbot_play_ikRequest()
         req.target_pose = mc.get_current_pose()
-        req.target_pose.pose.position.z += 0.1
+        req.target_pose.pose.position.z += 0.05
         res: airbot_play_ikResponse = client.call(req)
         print("ik response is：", res.result)
 
@@ -111,7 +122,7 @@ if __name__ == "__main__":
     from geometry_msgs.msg import PoseStamped
 
     eef_pose_pub = rospy.Publisher(
-        f"/{args.name_space}/current_pose", PoseStamped, queue_size=1
+        f"{args.name_space}/current_pose", PoseStamped, queue_size=1
     )
 
     def publish_eef_pose():
