@@ -236,7 +236,7 @@ def arm_ik_pose_callback_left(cmd_msg: PoseStamped):
         frame_id = "s"
 
     arm_joint_pos_target[:6] = target
-    left_frame_id = frame_id
+    left_frame_id = "-" + frame_id
     last_left_pose_cmd = cmd_msg.pose
     joint_cmd.header.stamp = rospy.Time.now()
 
@@ -257,7 +257,7 @@ def arm_ik_pose_callback_right(cmd_msg: PoseStamped):
         frame_id = "s"
 
     arm_joint_pos_target[6:] = target
-    right_frame_id = frame_id
+    right_frame_id = "-" + frame_id
     last_right_pose_cmd = cmd_msg.pose
     joint_cmd.header.stamp = rospy.Time.now()
 
@@ -294,6 +294,8 @@ while (
 rate = rospy.Rate(10)
 while not rospy.is_shutdown():
     if target_kind == "pose":
+        if left_frame_id[0] == right_frame_id[0] == "-":
+            left_frame_id, right_frame_id = left_frame_id[1:], right_frame_id[1:]
         joint_cmd.header.frame_id = left_frame_id + right_frame_id
     joint_cmd.position = tuple(arm_joint_pos_target)
     joint_cmd_puber.publish(joint_cmd)
