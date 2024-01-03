@@ -44,6 +44,14 @@ parser.add_argument(
     help="set the number of times the motion plan is to be computed from scratch before the shortest solution is returned",
 )
 
+parser.add_argument(
+    "-ia",
+    "--num_ik_attempts",
+    type=int,
+    default=1,
+    help="set the number of times the ik is to be computed from scratch before the solution is returned",
+)
+
 args, unknown = parser.parse_known_args()
 
 target_position_topic = args.target_position_topic
@@ -51,6 +59,7 @@ joint_cmd_topic = args.joint_cmd_topic
 target_pose_topic = args.target_pose_topic
 planning_time = args.planning_time
 num_planning_attempts = args.num_planning_attempts
+num_ik_attempts = args.num_ik_attempts
 
 from moveit_commander import MoveGroupCommander
 import rospy
@@ -116,6 +125,7 @@ result_dict = {
     "ignore": 2,
 }
 
+
 def single_ik_process(
     target: Union[list, tuple, Pose], arm: MoveGroupCommander, target_type="position"
 ):
@@ -138,14 +148,20 @@ def single_ik_process(
             plan_success, traj, planning_time, error_code = arm.plan()
             arm.clear_pose_targets()
         elif target_type == "pose":
-            try:
-                start_time = rospy.Time.now()
-                arm.set_joint_value_target(target, arm.get_end_effector_link(), False)
-                planning_time = (rospy.Time.now() - start_time).to_sec()
-            except Exception as e:
-                plan_success = False
-            else:
-                plan_success = True
+            cnt = 0
+            while cnt < num_ik_attempts:
+                try:
+                    start_time = rospy.Time.now()
+                    arm.set_joint_value_target(
+                        target, arm.get_end_effector_link(), False
+                    )
+                    planning_time = (rospy.Time.now() - start_time).to_sec()
+                except:
+                    cnt += 1
+                    plan_success = False
+                else:
+                    plan_success = True
+                    break
     if plan_success:
         print(f"{arm.get_name()} ik success with time: {planning_time:.4f} seconds")
         if target_type == "position":
@@ -154,7 +170,13 @@ def single_ik_process(
             target = list(arm.get_joint_value_target())
         result = result_dict["success"]
     else:
-        print(f"{arm.get_name()} ik failed with target:", target)
+        if target_type == "position":
+            print(
+                f"{arm.get_name()} ik failed after {num_planning_attempts} attempts with target: {target} "
+            )
+        else:
+            print(f"{arm.get_name()} ik failed after {num_ik_attempts} attempts with target:")
+            print(target)
         target = None
         result = result_dict["faild"]
     return target, result
