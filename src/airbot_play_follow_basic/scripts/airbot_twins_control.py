@@ -21,6 +21,14 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-cpe",
+    "--current_pose_topic",
+    type=str,
+    default="/airbot_twins/current_pose",
+    help="namespace of current pose topic, the raw name is /letf and /right, the type of both is geometry_msgs/PoseStamped",
+)
+
+parser.add_argument(
     "-jc",
     "--joint_cmd_topic",
     type=str,
@@ -60,12 +68,14 @@ target_pose_topic = args.target_pose_topic
 planning_time = args.planning_time
 num_planning_attempts = args.num_planning_attempts
 num_ik_attempts = args.num_ik_attempts
+current_pose_topic = args.current_pose_topic
 
 from moveit_commander import MoveGroupCommander
 import rospy
 from geometry_msgs.msg import Twist, PoseStamped, Pose
 from sensor_msgs.msg import JointState
 from typing import Union
+from threading import Thread
 
 rospy.init_node("airbot_twins_control")
 
@@ -175,7 +185,9 @@ def single_ik_process(
                 f"{arm.get_name()} ik failed after {num_planning_attempts} attempts with target: {target} "
             )
         else:
-            print(f"{arm.get_name()} ik failed after {num_ik_attempts} attempts with target:")
+            print(
+                f"{arm.get_name()} ik failed after {num_ik_attempts} attempts with target:"
+            )
             print(target)
         target = None
         result = result_dict["faild"]
@@ -279,6 +291,24 @@ pose_cmd_suber_right = rospy.Subscriber(
     arm_ik_pose_callback_right,
     queue_size=1,
 )
+
+current_pose_puber_left = rospy.Publisher(
+    current_pose_topic + "/left", PoseStamped, queue_size=1
+)
+current_pose_puber_right = rospy.Publisher(
+    current_pose_topic + "/right", PoseStamped, queue_size=1
+)
+
+
+def current_pose_puber_thread():
+    rate = rospy.Rate(10)
+    while not rospy.is_shutdown():
+        current_pose_puber_left.publish(airbot_twins_left.get_current_pose())
+        current_pose_puber_right.publish(airbot_twins_right.get_current_pose())
+        rate.sleep()
+
+
+Thread(target=current_pose_puber_thread, daemon=True).start()
 
 # wait for first cmd
 print("waiting for first cmd...")
