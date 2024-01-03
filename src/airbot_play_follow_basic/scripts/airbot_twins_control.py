@@ -54,20 +54,28 @@ num_planning_attempts = args.num_planning_attempts
 
 from moveit_commander import MoveGroupCommander
 import rospy
-from geometry_msgs.msg import Twist, PoseStamped
+from geometry_msgs.msg import Twist, PoseStamped, Pose
 from sensor_msgs.msg import JointState
+from typing import Union
 
 rospy.init_node("airbot_twins_control")
 
-airbot_twins_left = MoveGroupCommander("airbot_play_left_arm")
-airbot_twins_right = MoveGroupCommander("airbot_play_right_arm")
-airbot_twins_left.set_pose_reference_frame("body_link")
-airbot_twins_right.set_pose_reference_frame("body_link")
-airbot_twins_left.set_planning_time(planning_time)
-airbot_twins_left.set_num_planning_attempts(num_planning_attempts)
-airbot_twins_right.set_planning_time(planning_time)
-airbot_twins_right.set_num_planning_attempts(num_planning_attempts)
+
+def arm_init(group_name: str):
+    arm = MoveGroupCommander(group_name)
+    arm.set_pose_reference_frame("body_link")
+    arm.set_planning_time(planning_time)
+    arm.set_num_planning_attempts(num_planning_attempts)
+    return arm
+
+
+airbot_twins_left = arm_init("airbot_play_left_arm")
+airbot_twins_right = arm_init("airbot_play_right_arm")
 last_twins_cmd = Twist()
+last_left_pose_cmd = Pose()
+last_right_pose_cmd = Pose()
+left_frame_id = "i"
+right_frame_id = "i"
 joint_cmd_puber = rospy.Publisher(joint_cmd_topic, JointState, queue_size=1)
 arm_joint_pos_target = [0] * 12
 joint_cmd = JointState()
@@ -85,8 +93,15 @@ joint_cmd.name = [
     "right_joint5",
     "right_joint6",
 ]
-joint_cmd.header.frame_id = "success"
-joint_cmd.position = (0,) * 12
+joint_cmd.header.frame_id = "waiting"
+
+try:
+    joint_cmd.position = list(airbot_twins_left.get_current_joint_values()) + list(
+        airbot_twins_right.get_current_joint_values()
+    )
+except:
+    joint_cmd.position = (0,) * 12
+target_kind = "position"
 
 success_dict = {
     0x00: "success",
@@ -95,80 +110,134 @@ success_dict = {
     0x11: "both_faild",
 }
 
+result_dict = {
+    "success": 0,
+    "faild": 1,
+    "ignore": 2,
+}
+
+def single_ik_process(
+    target: Union[list, tuple, Pose], arm: MoveGroupCommander, target_type="position"
+):
+    """
+    target: [x,y,z] or Pose
+    target_type: "position" or "pose"
+    return: target, result;
+        target is None if failed or ignored;
+        result is 0, 1 or 2;
+    """
+    if (target_type == "position" and target == [0, 0, 0]) or (
+        target_type == "pose" and target == Pose()
+    ):
+        print(f"{arm.get_name()} ik ignored because target is all 0")
+        return None, result_dict["ignore"]
+    else:
+        joint_cmd.header.frame_id = "planning"
+        if target_type == "position":
+            arm.set_position_target(target)
+            plan_success, traj, planning_time, error_code = arm.plan()
+            arm.clear_pose_targets()
+        elif target_type == "pose":
+            try:
+                start_time = rospy.Time.now()
+                arm.set_joint_value_target(target, arm.get_end_effector_link(), False)
+                planning_time = (rospy.Time.now() - start_time).to_sec()
+            except Exception as e:
+                plan_success = False
+            else:
+                plan_success = True
+    if plan_success:
+        print(f"{arm.get_name()} ik success with time: {planning_time:.4f} seconds")
+        if target_type == "position":
+            target = list(traj.joint_trajectory.points[-1].positions)
+        elif target_type == "pose":
+            target = list(arm.get_joint_value_target())
+        result = result_dict["success"]
+    else:
+        print(f"{arm.get_name()} ik failed with target:", target)
+        target = None
+        result = result_dict["faild"]
+    return target, result
+
+
+def twins_ik_process(
+    left_target: Union[list, tuple, Pose, None],
+    right_target: Union[list, tuple, Pose, None],
+    target_type,
+):
+    global arm_joint_pos_target, left_frame_id, right_frame_id
+    failure = 0x00
+    # left arm
+    left_target, result = single_ik_process(left_target, airbot_twins_left, target_type)
+    if left_target is None:
+        left_target = arm_joint_pos_target[:6]
+        if result == result_dict["faild"]:
+            failure = 0x10
+    # right arm
+    right_target, result = single_ik_process(
+        right_target, airbot_twins_right, target_type
+    )
+    if right_target is None:
+        right_target = arm_joint_pos_target[6:]
+        if result == result_dict["faild"]:
+            failure += 0x01
+    # joint cmd
+    joint_cmd.header.frame_id = success_dict[failure]
+    arm_joint_pos_target = left_target + right_target
+    joint_cmd.header.stamp = rospy.Time.now()
+
 
 def arm_ik_position_callback(cmd_msg: Twist):
-    global last_twins_cmd
+    global last_twins_cmd, target_kind
+    target_kind = "position"
     if last_twins_cmd == cmd_msg:
         return
-    failure = 0x00
     left_position = [cmd_msg.linear.x, cmd_msg.linear.y, cmd_msg.linear.z]
     right_position = [cmd_msg.angular.x, cmd_msg.angular.y, cmd_msg.angular.z]
-    # left arm
-    if left_position == [0, 0, 0]:
-        plan_success = False
-    else:
-        airbot_twins_left.set_position_target(left_position)
-        joint_cmd.header.frame_id = "planning"
-        plan_success, traj, planning_time, error_code = airbot_twins_left.plan()
-        airbot_twins_left.clear_pose_targets()
-        print("left ik success with planning time:", planning_time, "seconds")
-    if plan_success:
-        left_target = list(traj.joint_trajectory.points[-1].positions)
-    else:
-        failure = 0x10
-        left_target = list(joint_cmd.position)[0:6]
-        print("left ik failed with target:", left_position)
-    # right arm
-    if right_position == [0, 0, 0]:
-        plan_success = False
-    else:
-        airbot_twins_right.set_position_target(right_position)
-        joint_cmd.header.frame_id = "planning"
-        plan_success, traj, planning_time, error_code = airbot_twins_right.plan()
-        airbot_twins_right.clear_pose_targets()
-        print("right ik success with planning time:", planning_time, "seconds")
-    if plan_success:
-        right_target = list(traj.joint_trajectory.points[-1].positions)
-    else:
-        failure += 0x01
-        right_target = list(joint_cmd.position)[6:12]
-        print("right ik failed with target:", right_position)
-    joint_cmd.header.frame_id = success_dict[failure]
-    joint_cmd.position = tuple(left_target + right_target)
-    joint_cmd.header.stamp = rospy.Time.now()
+    twins_ik_process(left_position, right_position, "position")
     last_twins_cmd = cmd_msg
 
 
 def arm_ik_pose_callback_left(cmd_msg: PoseStamped):
-    global last_twins_cmd
-    if last_twins_cmd == cmd_msg:
+    global last_left_pose_cmd, arm_joint_pos_target, left_frame_id, target_kind
+    target_kind = "pose"
+    if last_left_pose_cmd == cmd_msg.pose:
         return
-    try:
-        airbot_twins_left.set_joint_value_target(
-            cmd_msg, airbot_twins_left.get_end_effector_link(), False
-        )
-    except Exception as e:
-        print("set_joint_value_target error:", e)
+    target, result = single_ik_process(cmd_msg.pose, airbot_twins_left, "pose")
+    if target is None:
+        target = arm_joint_pos_target[:6]
+        if result == result_dict["faild"]:
+            frame_id = "f"
+        else:
+            frame_id = "i"
     else:
-        arm_joint_pos_target[:6] = airbot_twins_left.get_joint_value_target()
+        frame_id = "s"
 
-    last_twins_cmd = cmd_msg
+    arm_joint_pos_target[:6] = target
+    left_frame_id = frame_id
+    last_left_pose_cmd = cmd_msg.pose
+    joint_cmd.header.stamp = rospy.Time.now()
 
 
 def arm_ik_pose_callback_right(cmd_msg: PoseStamped):
-    global last_twins_cmd
-    if last_twins_cmd == cmd_msg:
+    global last_right_pose_cmd, arm_joint_pos_target, right_frame_id, target_kind
+    target_kind = "pose"
+    if last_right_pose_cmd == cmd_msg.pose:
         return
-    try:
-        airbot_twins_right.set_joint_value_target(
-            cmd_msg, airbot_twins_right.get_end_effector_link(), False
-        )
-    except Exception as e:
-        print("set_joint_value_target error:", e)
+    target, result = single_ik_process(cmd_msg.pose, airbot_twins_right, "pose")
+    if target is None:
+        target = arm_joint_pos_target[6:]
+        if result == result_dict["faild"]:
+            frame_id = "f"
+        else:
+            frame_id = "i"
     else:
-        arm_joint_pos_target[6:] = airbot_twins_right.get_joint_value_target()
+        frame_id = "s"
 
-    last_twins_cmd = cmd_msg
+    arm_joint_pos_target[6:] = target
+    right_frame_id = frame_id
+    last_right_pose_cmd = cmd_msg.pose
+    joint_cmd.header.stamp = rospy.Time.now()
 
 
 position_cmd_suber = rospy.Subscriber(
@@ -191,13 +260,20 @@ pose_cmd_suber_right = rospy.Subscriber(
 
 # wait for first cmd
 print("waiting for first cmd...")
-while last_twins_cmd == Twist():
+while (
+    last_twins_cmd == Twist()
+    and last_left_pose_cmd == Pose()
+    and last_right_pose_cmd == Pose()
+):
     if rospy.is_shutdown():
         exit()
     rospy.sleep(0.5)
 
 rate = rospy.Rate(10)
 while not rospy.is_shutdown():
+    if target_kind == "pose":
+        joint_cmd.header.frame_id = left_frame_id + right_frame_id
+    joint_cmd.position = tuple(arm_joint_pos_target)
     joint_cmd_puber.publish(joint_cmd)
     rospy.sleep(0.1)
 
