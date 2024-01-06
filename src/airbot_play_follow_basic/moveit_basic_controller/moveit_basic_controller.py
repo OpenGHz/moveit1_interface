@@ -100,7 +100,43 @@ class MoveItBasicController(MoveGroupCommander):
     #     else:
     #         raise Exception(f"IK service failed with error code: {ik_response.error_code.val}")
 
-    def compute_inverse_kinematics(self, pose: tuple, approximate=False) -> Union[tuple, None]:
+    def compute_inverse_kinematics(  # TODO: basic中不应该有这个全功能函数，应迁移到upper中
+        self, pose: tuple, approximate=False
+    ) -> Union[tuple, None]:
+        """逆运动学：将pose(x,y,z,x,y,z,w)转换为joint角度目标；如果失败，将打印错误信息并返回None"""
+        pose_type = Pose()
+        len_pose = len(pose)
+        if len_pose == 3:
+            pose_type.position.x, pose_type.position.y, pose_type.position.z = pose
+            pose_kind = "position"
+        elif len_pose == 4:
+            (
+                pose_type.orientation.x,
+                pose_type.orientation.y,
+                pose_type.orientation.z,
+                pose_type.orientation.w,
+            ) = pose
+            pose_kind = "orientation"
+        elif len_pose == 7:
+            pose_type.position.x, pose_type.position.y, pose_type.position.z = pose[:3]
+            (
+                pose_type.orientation.x,
+                pose_type.orientation.y,
+                pose_type.orientation.z,
+                pose_type.orientation.w,
+            ) = pose[3:]
+            pose_kind = "pose"
+        else:
+            raise Exception("pose must be a tuple of length 3, 4 or 7")
+        if pose_kind == "pose":
+            joints_value = self.pose_ik(pose, approximate)
+        elif pose_kind == "position":
+            joints_value = self.position_ik(pose)
+        elif pose_kind == "orientation":
+            joints_value = self.orientation_ik(pose)
+        return joints_value
+
+    def pose_ik(self, pose: tuple, approximate=False) -> Union[tuple, None]:
         """逆运动学：将pose(x,y,z,x,y,z,w)转换为joint角度目标；如果失败，将打印错误信息并返回None"""
         pose_type = Pose()
         pose_type.position.x, pose_type.position.y, pose_type.position.z = pose[:3]
@@ -113,16 +149,33 @@ class MoveItBasicController(MoveGroupCommander):
         # if not ever set, the default value is all zero
         joints_target_last = list(self.get_joint_value_target())
         eef_link = self.get_end_effector_link()
-        # if eef_link == "":
-        #     print("No end effector link specified. Using the last link instead")
-        #     eef_link = self.get_link_names()[-1]
         try:
             self.set_joint_value_target(pose_type, eef_link, approximate)
-        except Exception as e:
+        except:
             joints_value = None
         else:
             joints_value = self.get_joint_value_target()
             self.set_joint_value_target(joints_target_last)
+        return joints_value
+
+    def position_ik(self, position: tuple) -> Union[tuple, None]:
+        self.set_position_target(position)
+        plan_success, traj, planning_time, error_code = self.plan()
+        self.clear_pose_targets()
+        if plan_success:
+            joints_value = traj.joint_trajectory.points[-1].positions
+        else:
+            joints_value = None
+        return joints_value
+
+    def orientation_ik(self, orientation: tuple) -> Union[tuple, None]:
+        self.set_orientation_target(orientation)
+        plan_success, traj, planning_time, error_code = self.plan()
+        self.clear_pose_targets()
+        if plan_success:
+            joints_value = traj.joint_trajectory.points[-1].positions
+        else:
+            joints_value = None
         return joints_value
 
     def __tuple_to_pose(self, pose: tuple) -> Pose:
