@@ -17,6 +17,7 @@ class IkControlServer(MoveItBasicController):
         self, name, robot_description="robot_description", ns="", wait_for_servers=5
     ):
         super().__init__(name, robot_description, ns, wait_for_servers)
+        self.__ns = ns
         self.ik_server = rospy.Service(
             f"{ns}/ik_service", airbot_play_ik, self._handle_ik
         )
@@ -32,16 +33,24 @@ class IkControlServer(MoveItBasicController):
         success = 0
         while attempts_ik > 0:
             attempts_ik -= 1
-            joint_target = self.compute_inverse_kinematics(
-                tuple(conversions.pose_to_list(req.target_pose.pose))
-            )
+            if req.target_pose.header.frame_id != "":
+                self.set_pose_reference_frame(req.target_pose.header.frame_id)
+            pose_list = conversions.pose_to_list(req.target_pose.pose)
+            if pose_list[3:] == [0, 0, 0, 0]:
+                joint_target = self.position_ik(tuple(pose_list[:3]))
+            else:
+                joint_target = self.pose_ik(tuple(pose_list))
+            if joint_target is not None:
+                rospy.set_param(f"{self.__ns}/joint_target", joint_target)
             if joint_target is None:
+                rospy.set_param(f"{self.__ns}/joint_target", "None")
                 continue
             elif not self._no_plan:
                 attempts_ik = 20  # reset attempts_ik
                 attempts_plan -= 1
                 # `go()` returns a boolean indicating whether the planning and execution was successful.
                 if self.go(joint_target, wait=True):
+                    # TODO: 不用必须等待执行
                     # Calling `stop()` ensures that there is no residual movement
                     self.stop()
                     success = 1
@@ -66,6 +75,7 @@ class IkControlServer(MoveItBasicController):
 
 if __name__ == "__main__":
     import argparse
+    from geometry_msgs.msg import PoseStamped
 
     parser = argparse.ArgumentParser("AIRbotPlay PickPlace param set.")
     parser.add_argument(
@@ -109,6 +119,17 @@ if __name__ == "__main__":
         mc.set_pose_reference_frame(args.pose_reference_frame)
     if not args.use_plan:
         mc.no_plan()
+
+    # print args
+    print("********************************")
+    print("name_space: ", args.name_space)
+    print("group_name: ", args.group_name)
+    print("robot_description: ", args.robot_description)
+    print("pose_reference_frame: ", mc.get_pose_reference_frame())
+    print("use_plan: ", args.use_plan)
+    print("test: ", args.test)
+    print("********************************")
+
     if args.test:
         client = rospy.ServiceProxy(f"{args.name_space}/ik_service", airbot_play_ik)
         client.wait_for_service(timeout=5)
@@ -116,24 +137,23 @@ if __name__ == "__main__":
         req.target_pose = mc.get_current_pose()
         req.target_pose.pose.position.z += 0.05
         res: airbot_play_ikResponse = client.call(req)
-        print("ik response is：", res.result)
+        # TODO: 响应是否改成joint_states
+        print("ik response is：", res.result, ", 1 means success; 0 means fail")
+        joint_target = rospy.get_param(f"{args.name_space}/joint_target", "None")
+        print("joint_target is：", joint_target)
+        req.target_pose.pose.orientation = PoseStamped().pose.orientation
+        res: airbot_play_ikResponse = client.call(req)
+        print("ik response is：", res.result, ", 1 means success; 0 means fail")
+        joint_target = rospy.get_param(f"{args.name_space}/joint_target", "None")
+        print("joint_target is：", joint_target)
 
-    # 发布末端位姿话题
-    from geometry_msgs.msg import PoseStamped
-
-    eef_pose_pub = rospy.Publisher(
+    # 发布当前末端位姿话题
+    current_pose_pub = rospy.Publisher(
         f"{args.name_space}/current_pose", PoseStamped, queue_size=1
     )
 
-    def publish_eef_pose():
-        rt = rospy.Rate(200)
-        while True:
-            eef_pose = mc.get_current_pose()
-            eef_pose_pub.publish(eef_pose)
-            rt.sleep()
-
-    from threading import Thread
-
-    Thread(target=publish_eef_pose, daemon=True).start()
-
-    rospy.spin()
+    rt = rospy.Rate(200)
+    while not rospy.is_shutdown():
+        eef_pose = mc.get_current_pose()
+        current_pose_pub.publish(eef_pose)
+        rt.sleep()
