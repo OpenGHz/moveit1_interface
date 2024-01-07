@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 # install tkinter
-sudo apt-get install python3-tk
+sudo apt-get install python3-tk -y
 # install useful robot tools such as interpolation, coordinate transformation, etc.
 echo "Trying to install packages from github..."
 if [ ! -d "robot_tools" ]; then
