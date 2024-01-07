@@ -1,0 +1,12 @@
+controller_list:
+  - name: fake_vx300_controller
+    type: $(arg fake_execution_type)
+    joints:
+      - waist
+      - shoulder
+      - elbow
+      - wrist_angle
+      - wrist_rotate
+initial:  # Define initial robot poses per group
+  - group: vx300
+    pose: Home

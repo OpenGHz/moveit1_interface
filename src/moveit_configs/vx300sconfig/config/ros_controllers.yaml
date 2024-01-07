@@ -1,0 +1,40 @@
+vx300s_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - waist
+    - shoulder
+    - elbow
+    - forearm_roll
+    - wrist_angle
+    - wrist_rotate
+  gains:
+    waist:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    shoulder:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    elbow:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    forearm_roll:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    wrist_angle:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
+    wrist_rotate:
+      p: 100
+      d: 1
+      i: 1
+      i_clamp: 1
