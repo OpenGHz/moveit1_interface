@@ -35,7 +35,7 @@ class MoveItAction(object):
         self.all_joint_nums = self.arm_joint_nums + self.gripper_joint_nums
         self.init_pose = [0, -0.025, 0.025, 0, 0, 0]  # 初始状态（单位为rad，防止零位干涉）
 
-        self.new_action = False
+        self.new_action = True  # do not send init cmd
         self.times = 0
         self.max_times = 100
 

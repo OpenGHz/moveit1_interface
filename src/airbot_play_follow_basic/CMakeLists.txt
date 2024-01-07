@@ -10,5 +10,6 @@ catkin_install_python(PROGRAMS
   scripts/gripper_control.py
   scripts/ik_control_server.py
   scripts/airbot_twins_control.py
+  scripts/fake_arm.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
