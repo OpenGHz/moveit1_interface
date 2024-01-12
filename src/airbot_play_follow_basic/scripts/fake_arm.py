@@ -18,15 +18,31 @@ class AirbotPlayFake(object):
         self._use_default = False
         Thread(target=self._control_continue, daemon=True).start()
 
-    def set_default_joint_states(self, joint_names: list, joint_positions: list):
+    def set_default_joint_states(
+        self,
+        joint_names: list,
+        joint_positions: list,
+        joint_velocities: list,
+        joint_efforts: list,
+    ):
         """Set default joint states."""
         self._use_default = True
         self._joint_cmd_msg.name = tuple(joint_names)
         self._joint_cmd_msg.position = tuple(joint_positions)
+        self._joint_cmd_msg.velocity = tuple(joint_velocities)
+        self._joint_cmd_msg.effort = tuple(joint_efforts)
+        print("Set default joint states.")
+        print("Joint names: ", self._joint_cmd_msg.name)
+        print("Joint positions: ", self._joint_cmd_msg.position)
+        print("Joint velocities: ", self._joint_cmd_msg.velocity)
+        print("Joint efforts: ", self._joint_cmd_msg.effort)
 
     def _joint_cmd_callback(self, msg: JointState):
         if self._use_default:
+            # 关节名称使用默认的
             self._joint_cmd_msg.position = msg.position
+            self._joint_cmd_msg.velocity = msg.velocity
+            self._joint_cmd_msg.effort = msg.effort
         else:
             self._joint_cmd_msg = msg
 
@@ -83,12 +99,35 @@ if __name__ == "__main__":
         help="set default joint positions",
     )
 
+    parser.add_argument(
+        "-jv",
+        "--joint_velocities",
+        type=float,
+        nargs="+",
+        default=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        help="set default joint velocities",
+    )
+
+    parser.add_argument(
+        "-je",
+        "--joint_efforts",
+        type=float,
+        nargs="+",
+        default=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        help="set default joint efforts",
+    )
+
     args, unknown = parser.parse_known_args()
 
-    rospy.init_node("fake_arm")
+    rospy.init_node("fake_arm", anonymous=True)
     faker = AirbotPlayFake(
         cmd_topic=args.joint_cmd_topic, states_topic=args.joint_states_topic
     )
     if not args.not_set_default:
-        faker.set_default_joint_states(args.joint_names, args.joint_positions)
+        faker.set_default_joint_states(
+            args.joint_names,
+            args.joint_positions,
+            args.joint_velocities,
+            args.joint_efforts,
+        )
     rospy.spin()
