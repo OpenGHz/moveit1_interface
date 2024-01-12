@@ -14,6 +14,7 @@ class AirbotPlayFake(object):
             queue_size=10,
         )
         self.states_puber = rospy.Publisher(states_topic, JointState, queue_size=1)
+        print(f"Subscribe to {cmd_topic} and publish to {states_topic}.")
         self._joint_cmd_msg = JointState()
         self._use_default = False
         Thread(target=self._control_continue, daemon=True).start()
