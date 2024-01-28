@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 # install tkinter
 sudo apt-get install python3-tk -y

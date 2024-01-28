@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # set the color variables of 'echo' cmd
 DEF='\e[0m'

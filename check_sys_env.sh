@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # prepare git pip
 git --version || sudo apt update && sudo apt install git -y || exit 1
