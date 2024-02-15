@@ -117,6 +117,7 @@ if __name__ == "__main__":
     mc = IkControlServer(args.group_name, args.robot_description, args.name_space)
     if args.pose_reference_frame != "auto":
         mc.set_pose_reference_frame(args.pose_reference_frame)
+        # mc.set_end_effector_link()
     if not args.use_plan:
         mc.no_plan()
 

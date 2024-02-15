@@ -1,6 +1,7 @@
 <launch>
 
   <!-- parameters config -->
+  <arg name="namespace" default="airbot_play" />
   <arg name="fake_control" default="false" />
   <arg name="use_rviz"     default="false" />
   <arg name="target_moveit_config" default="airbot_play_inspire_eg2_4c_v2_arm_group_config"/>
@@ -15,7 +16,7 @@
   <param if="$(arg use_sim_time)" name="/use_sim_time" type="bool" value="true" />
 
   <!-- start moveit with airbot_play name space -->
-  <group ns="airbot_play">
+  <group ns="$(arg namespace)">
     <!-- start robot state publisher -->
     <node if="$(arg publish_robot_state)" name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
     <!-- start moveit controller server -->
