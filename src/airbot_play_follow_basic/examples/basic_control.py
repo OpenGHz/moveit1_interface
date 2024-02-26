@@ -56,7 +56,7 @@ def all_close(goal, actual, tolerance):
 class MoveGroupPythonInterfaceTutorial(object):
     """MoveGroupPythonInterfaceTutorial"""
 
-    def __init__(self, group_name="airbot_play", robot_description="robot_description", ns="airbot_play_arm"):
+    def __init__(self, group_name="airbot_play_arm", robot_description="/airbot_play/robot_description", ns="/airbot_play"):
         ## BEGIN_SUB_TUTORIAL setup
         ##
         ## First initialize a `rospy`_ node:
@@ -68,7 +68,7 @@ class MoveGroupPythonInterfaceTutorial(object):
         ## If you are using a different robot, change this value to the name of your robot
         ## arm planning group.
         ## This interface can be used to plan and execute motions:
-        mbc = MoveItBasicController(group_name)
+        mbc = MoveItBasicController(group_name, robot_description, ns)
 
         ## END_SUB_TUTORIAL
 
