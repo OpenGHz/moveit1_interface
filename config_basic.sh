@@ -9,6 +9,7 @@ if [ ! -d "robot_tools" ]; then
 fi
 pip install ./robot_tools -i https://pypi.tuna.tsinghua.edu.cn/simple
 # install inner python packages
+pip install ./src/airbot_play_ik_service
 pip install ./src/airbot_play_follow_basic -i https://pypi.tuna.tsinghua.edu.cn/simple
 # OK
 echo -e "\033[32m[INFO] Install successfully! \033[0m"
