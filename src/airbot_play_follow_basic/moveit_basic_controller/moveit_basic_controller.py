@@ -9,7 +9,7 @@ from moveit_msgs.srv import (
 from geometry_msgs.msg import Pose
 from sensor_msgs.msg import JointState
 import rospy
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 
 
 class MoveItBasicController(MoveGroupCommander):
@@ -28,6 +28,15 @@ class MoveItBasicController(MoveGroupCommander):
 
     def get_link_names(self) -> list:
         return self.__link_names
+
+    def get_link_poses(self, link_names: Union[List[str], str]) -> Union[tuple, str]:
+        """获取指定Link的位姿"""
+        if isinstance(link_names, str):
+            return self.__robot.get_link(link_names).pose()
+        else:
+            return tuple(
+                [self.__robot.get_link(link_name).pose() for link_name in link_names]
+            )
 
     def get_name_space(self) -> str:
         return self.__ns
