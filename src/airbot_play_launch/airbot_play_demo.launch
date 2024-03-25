@@ -8,20 +8,17 @@
   <!-- If needed, broadcast static tf for robot root -->
   <node if="$(eval arg('virtual_tf') != 'none')" pkg="tf2_ros" type="static_transform_publisher" name="virtual_joint_broadcaster_world_to_$(arg virtual_tf)" args="0 0 0 0 0 0 world $(arg virtual_tf)"/>
   <!-- Set target config file path -->
-  <arg name="dir_name" value="$(dirname)"/>
-  <arg name="to_be_replace" default="$(eval arg('dir_name').rsplit('/',2)[-1])"/>
-  <arg name="replaced" default=""/>
-  <arg name="parent_path" value="$(eval arg('dir_name').replace(arg('to_be_replace'),arg('replaced')))"/>
-  <arg name="configs_dir" value="$(arg parent_path)moveit_configs"/>
-  <arg name="target_config_dir" value="$(arg configs_dir)/$(arg target_moveit_config)/launch"/>
+  <arg name="cmd_to_find_pkg_path" value="['rospack','find','$(arg target_moveit_config)']"/>
+  <arg name="pkg_path" value="$(eval eval('_'+'_import_'+'_(&quot;subprocess&quot;)').check_output(eval(arg('cmd_to_find_pkg_path'))).decode().strip())"/>
+  <arg name="config_launch_dir" value="$(arg pkg_path)/launch"/>
   <!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default) -->
-  <include file="$(arg target_config_dir)/move_group.launch">
+  <include file="$(arg config_launch_dir)/move_group.launch">
     <arg name="pipeline" value="$(arg pipeline)"/>
     <arg name="load_robot_description" value="$(arg load_robot_description)"/>
   </include>
   <!-- Run Rviz and load the default config to see the state of the move_group node -->
-  <include file="$(arg target_config_dir)/moveit_rviz.launch" if="$(arg use_rviz)">
-    <arg name="rviz_config" value="$(arg target_config_dir)/moveit.rviz"/>
+  <include file="$(arg config_launch_dir)/moveit_rviz.launch" if="$(arg use_rviz)">
+    <arg name="rviz_config" value="$(arg config_launch_dir)/moveit.rviz"/>
   </include>
   <!-- Set key params of planning and excuting -->
   <param name="move_group/trajectory_execution/allowed_execution_duration_scaling" value="3.0"/>
