@@ -23,33 +23,29 @@ class MoveItAction(object):
     _result = FollowJointTrajectoryResult()
 
     # Action initialisation
-    def __init__(self, name, interpolation=5):
+    def __init__(self, name, interpolation, default_position, topic):
         """
-        name：action服务器名。
+        name：action服务器名（由相应ros_controller配置文件yaml定义）。
         interpolation支持：1为线性插值；2-5为n次样条插值。
         """
         self.interpolation = interpolation
         self.t_delta = 0.005  # 单位:s
-        self.arm_joint_nums = 6
-        self.gripper_joint_nums = 0
-        self.all_joint_nums = self.arm_joint_nums + self.gripper_joint_nums
-        self.init_pose = [0, -0.025, 0.025, 0, 0, 0]  # 初始状态（单位为rad，防止零位干涉）
+        self.init_pose = default_position  # 初始状态（单位为rad，防止零位干涉）
+        self.joint_nums = len(default_position)
 
         self.new_action = True  # do not send init cmd
         self.times = 0
         self.max_times = 100
 
-        self.cmd_publisher = rospy.Publisher(
-            "/airbot_play/joint_cmd", JointState, queue_size=10
-        )
+        self.cmd_publisher = rospy.Publisher(topic, JointState, queue_size=10)
         self.cmd = JointState()
         self.cmd.header.stamp = rospy.Time.now()
         self.cmd.header.frame_id = "airbot_play"
         self.cmd.position = self.init_pose
         self.cmd.velocity = [
-            0.8 for _ in range(self.arm_joint_nums)
+            0.8 for _ in range(self.joint_nums)
         ]  # 初始化速度值23度/s，从而控制电机缓慢移动到0位
-        self.cmd.effort = [0 for _ in range(self.arm_joint_nums)]
+        self.cmd.effort = [0 for _ in range(self.joint_nums)]
 
         rospy.Timer(rospy.Duration(1.0 / 200.0), self.control_continue)
 
@@ -72,22 +68,24 @@ class MoveItAction(object):
             self.execute_cb.__dict__["running"] = True
 
         # 不同类型处理（获得统一的points变量）
-        points: List[
-            JointTrajectoryPoint
-        ] = goal_handle.trajectory.points  # 获得目标途径上的所有轨迹点（无任何外在约束的情况下一般只有两个点）
+        points: List[JointTrajectoryPoint] = (
+            goal_handle.trajectory.points
+        )  # 获得目标途径上的所有轨迹点（无任何外在约束的情况下一般只有两个点）
 
         # 构造初始矩阵
         times = len(points)
         time_array = np.zeros(times)  # 关节位置的时间信息列表
-        joints_matrix = np.zeros((times, self.arm_joint_nums))  # 存储关节位置插值数据用的列表
+        joints_matrix = np.zeros(
+            (times, self.joint_nums)
+        )  # 存储关节位置插值数据用的列表
         joints_vel_matrix = joints_matrix.copy()
         joints_acc_matrix = joints_matrix.copy()
         # 分别获得各个点的时间信息和位置信息，放到两个列表中
         for time, point in enumerate(points):  # 单位为rad；每个point对应了某个时间点
-            time_array[time] = point.time_from_start.to_sec()  # 不同关节具有相同的时间点
-            joints_matrix[
-                time
-            ] = (
+            time_array[time] = (
+                point.time_from_start.to_sec()
+            )  # 不同关节具有相同的时间点
+            joints_matrix[time] = (
                 point.positions
             )  # point.positions[j]存储了关节j在当前时间的角度值；joints_matrix每一行存储了某个时间点所有关节的角度目标
             joints_vel_matrix[time] = point.velocities
@@ -133,13 +131,14 @@ class MoveItAction(object):
         )  # 速度计算
         joints_list = joints_matrix_new.tolist()
 
-        speed_min_limit_matrix = (
-            np.abs(speed_matrix) + min_vel
-        )  # 对速度求绝对值，因为底层仅接收正速度；限制最小速度
+        # 对速度求绝对值，因为底层仅接收正速度；限制最小速度
+        speed_min_limit_matrix = np.abs(speed_matrix) + min_vel
+        # 限制最大速度
         speed_list: list = np.where(
             speed_min_limit_matrix > max_vel, max_vel, speed_min_limit_matrix
-        ).tolist()  # 限制最大速度
-        speed_list.insert(0, list(speed_list[0]))  # 发送第一个点的期望速度设置为与第二个点相同
+        ).tolist()
+        # 发送第一个点的期望速度设置为与第二个点相同
+        speed_list.insert(0, list(speed_list[0]))
 
         # 遍历所有插值时间发送cmd
         self.new_action = True
@@ -195,8 +194,11 @@ if __name__ == "__main__":
     action_name = rospy.get_param(
         "~action_name", default="arm_position_controller/follow_joint_trajectory"
     )
+    default_position = rospy.get_param("~default_position", default="0,0,0,0,0,0")
     interpolation_type = rospy.get_param("~interpolation_type", default=5)
-    MoveItAction(action_name, interpolation=interpolation_type)
+    cmd_topic = rospy.get_param("~cmd_topic", default="/airbot_play/joint_cmd")
+    default_position = [float(pos) for pos in default_position.split(",")]
+    MoveItAction(action_name, interpolation_type, default_position, cmd_topic)
 
     rospy.loginfo("Ready to follow joint trajectory.")
     rospy.spin()
