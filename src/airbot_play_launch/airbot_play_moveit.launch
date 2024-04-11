@@ -42,7 +42,7 @@
       <node if="$(arg use_gripper)" pkg="airbot_play_control_upper" type="airbot_play_follow_joint_trajectory_server.py" name="gripper_follow_joint_trajectory_server" output="screen">
         <param name="action_name" value="gripper_position_controller/follow_joint_trajectory"/>
         <param name="default_position" value="0,0"/>
-        <param name="cmd_topic" value="/airbot_play/end_effector/joint_cmd"/>
+        <param name="cmd_topic" value="/airbot_play/end_effector/command"/>
       </node>
     </group>
     <!-- demo start -->
