@@ -11,6 +11,8 @@
   <arg name="virtual_tf" default="none" doc="if not none, specify the name of the link connected to world"/>
   <arg name="load_robot_description" default="true" doc="whether load planning context robot_description"/>
   <arg name="pipeline" default="ompl" doc="specify the planning pipeline"/>
+  <arg name="arm_cmd_topic" default="/airbot_play/joint_cmd"/>
+  <arg name="gripper_cmd_topic" default="/airbot_play/end_effector/command"/>
 
   <!-- set to use sim time -->
   <arg name="use_sim_time" default="false" />
@@ -25,7 +27,7 @@
       <node pkg="airbot_play_follow_basic" type="follow_joint_trajectory_server_basic.py" name="arm_follow_joint_trajectory_server" output="screen">
         <param name="action_name" value="arm_position_controller/follow_joint_trajectory"/>
         <param name="default_position" value="0,0,0,0,0,0"/>
-        <param name="cmd_topic" value="/airbot_play/joint_cmd"/>
+        <param name="cmd_topic" value="$(arg arm_cmd_topic)"/>
       </node>
       <node if="$(arg use_gripper)" pkg="airbot_play_follow_basic" type="follow_joint_trajectory_server_basic.py" name="gripper_follow_joint_trajectory_server" output="screen">
         <param name="action_name" value="gripper_position_controller/follow_joint_trajectory"/>
@@ -37,7 +39,7 @@
       <node pkg="airbot_play_control_upper" type="airbot_play_follow_joint_trajectory_server.py" name="arm_follow_joint_trajectory_server" output="screen">
         <param name="action_name" value="arm_position_controller/follow_joint_trajectory"/>
         <param name="default_position" value="0,0,0,0,0,0"/>
-        <param name="cmd_topic" value="/airbot_play/joint_cmd"/>
+        <param name="cmd_topic" value="$(arg arm_cmd_topic)"/>
       </node>
       <node if="$(arg use_gripper)" pkg="airbot_play_control_upper" type="airbot_play_follow_joint_trajectory_server.py" name="gripper_follow_joint_trajectory_server" output="screen">
         <param name="action_name" value="gripper_position_controller/follow_joint_trajectory"/>
