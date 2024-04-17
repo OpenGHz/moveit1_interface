@@ -23,13 +23,13 @@ class MoveItAction(object):
     _result = FollowJointTrajectoryResult()
 
     # Action initialisation
-    def __init__(self, name, interpolation, default_position, topic):
+    def __init__(self, name, interpolation, default_position, topic, frequency):
         """
         name：action服务器名（由相应ros_controller配置文件yaml定义）。
         interpolation支持：1为线性插值；2-5为n次样条插值。
         """
         self.interpolation = interpolation
-        self.t_delta = 0.005  # 单位:s
+        self.t_delta = 1 / frequency  # 单位:s
         self.init_pose = default_position  # 初始状态（单位为rad，注意防止零位干涉）
         self.joint_nums = len(default_position)
 
@@ -47,7 +47,7 @@ class MoveItAction(object):
         self.cmd.effort = [0 for _ in range(self.joint_nums)]
         self.is_sending_cmd = False
 
-        rospy.Timer(rospy.Duration(1.0 / 200.0), self.control_continue)
+        rospy.Timer(rospy.Duration(self.t_delta), self.control_continue)
 
         self._action_server = SimpleActionServer(
             name,
@@ -188,7 +188,8 @@ if __name__ == "__main__":
     interpolation_type = rospy.get_param("~interpolation_type", default=5)
     cmd_topic = rospy.get_param("~cmd_topic", default="/airbot_play/joint_cmd")
     default_position = [float(pos) for pos in default_position.split(",")]
-    MoveItAction(action_name, interpolation_type, default_position, cmd_topic)
+    frequency = rospy.get_param("~frequency", default=200)
+    MoveItAction(action_name, interpolation_type, default_position, cmd_topic, frequency)
 
     rospy.loginfo("Ready to follow joint trajectory.")
     rospy.spin()
