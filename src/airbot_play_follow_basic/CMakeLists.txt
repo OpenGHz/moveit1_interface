@@ -11,5 +11,6 @@ catkin_install_python(PROGRAMS
   scripts/ik_control_server.py
   scripts/airbot_twins_control.py
   scripts/fake_arm.py
+  scripts/ros_interface.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
