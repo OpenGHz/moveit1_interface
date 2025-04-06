@@ -76,5 +76,5 @@ class AirbotPlayRosInterface:
 
 if __name__ == "__main__":
     rospy.init_node("airbot_play_ros_interface", anonymous=True)
-    airbot_player = AirbotPlayRosInterface(AIRBOTPlayCfg())
+    airbot_player = AirbotPlayRosInterface(AIRBOTPlayCfg(url=rospy.get_param("~url", "localhost"), port=int(rospy.get_param("~port", 50051))))
     rospy.spin()
