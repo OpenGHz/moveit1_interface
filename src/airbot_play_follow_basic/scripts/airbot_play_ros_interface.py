@@ -16,7 +16,7 @@ class AirbotPlayRosInterface:
     def __init__(self, config: AIRBOTPlayCfg):
         self.robot = AIRBOTPlay(**asdict(config))
         self.robot.switch_mode(RobotMode.SERVO_JOINT_POS)
-
+        assert self.robot.connect(), "Failed to connect to robot"
         while not self.robot._feedback_jointstates:
             rospy.loginfo("Waiting for robot feedback...")
             rospy.sleep(0.5)
@@ -83,3 +83,4 @@ if __name__ == "__main__":
     rospy.init_node("airbot_play_ros_interface", anonymous=True)
     airbot_player = AirbotPlayRosInterface(AIRBOTPlayCfg(url=rospy.get_param("~url", "localhost"), port=int(rospy.get_param("~port", 50051))))
     rospy.spin()
+    airbot_player.robot.disconnect()
