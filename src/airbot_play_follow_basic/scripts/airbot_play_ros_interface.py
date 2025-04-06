@@ -72,7 +72,7 @@ class AirbotPlayRosInterface:
         evel = self.robot.get_eef_vel()
         eeef = self.robot.get_eef_eff()
         self.joint_state.position = qpos + [epos, -epos]
-        self.joint_state.velocity = self.robot.get_joint_pos() + [evel] * 2
+        self.joint_state.velocity = self.robot.get_joint_vel() + [evel] * 2
         self.joint_state.effort = self.robot.get_joint_eff() + [eeef] * 2
         self.joint_state.header.stamp = rospy.Time.now()
         self.joint_state_puber.publish(self.joint_state)
