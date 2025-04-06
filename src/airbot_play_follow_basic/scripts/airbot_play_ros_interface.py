@@ -47,11 +47,6 @@ class AirbotPlayRosInterface:
 
         self.joint_state = JointState()
         self.joint_state.name = [f"joint{i+1}" for i in range(6)] + ["endleft", "endright"]
-
-        self.joint_state.position = self.robot.get_joint_pos() + [self.robot.get_eef_pos()]
-        self.joint_state.velocity = self.robot.get_joint_vel() + [self.robot.get_eef_vel()]
-        self.joint_state.effort = self.robot.get_joint_eff() + [self.robot.get_eef_eff()]
-
         self.js_timer = rospy.Timer(rospy.Duration(1 / 200), self.pub_joint_states)
 
     def arm_cmd_cb(self, msg: JointState):
