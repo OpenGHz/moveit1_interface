@@ -17,6 +17,11 @@ class AirbotPlayRosInterface:
         self.robot = AIRBOTPlay(**asdict(config))
         self.robot.switch_mode(RobotMode.SERVO_JOINT_POS)
 
+        while not self.robot._feedback_jointstates:
+            rospy.loginfo("Waiting for robot feedback...")
+            rospy.sleep(0.5)
+        rospy.loginfo("Robot feedback received.")
+
         self.eef_factor = 0.07
 
         self.tar_jq = np.zeros(7)
