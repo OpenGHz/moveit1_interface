@@ -64,7 +64,7 @@ class AirbotPlayRosInterface:
     def pub_joint_states(self, event):
         qpos = self.robot.get_joint_pos()
         epos = (self.eef_factor - self.robot.get_eef_pos()[0]) / 2
-        evel = self.robot.get_eef_vel()[0]
+        evel = 0.0
         eeef = self.robot.get_eef_eff()[0]
         self.joint_state.position = qpos + [0.01, -0.01]
         self.joint_state.velocity = self.robot.get_joint_vel() + [evel] * 2
