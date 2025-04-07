@@ -15,8 +15,8 @@ class AIRBOTPlayCfg:
 class AirbotPlayRosInterface:
     def __init__(self, config: AIRBOTPlayCfg):
         self.robot = AIRBOTPlay(**asdict(config))
-        self.robot.switch_mode(RobotMode.SERVO_JOINT_POS)
         assert self.robot.connect(), "Failed to connect to robot"
+        self.robot.switch_mode(RobotMode.SERVO_JOINT_POS)
         while not self.robot._feedback_jointstates:
             rospy.loginfo("Waiting for robot feedback...")
             rospy.sleep(0.5)
@@ -66,7 +66,7 @@ class AirbotPlayRosInterface:
         epos = (self.eef_factor - self.robot.get_eef_pos()[0]) / 2
         evel = self.robot.get_eef_vel()[0]
         eeef = self.robot.get_eef_eff()[0]
-        self.joint_state.position = qpos + [epos, -epos]
+        self.joint_state.position = qpos + [0.01, -0.01]
         self.joint_state.velocity = self.robot.get_joint_vel() + [evel] * 2
         self.joint_state.effort = self.robot.get_joint_eff() + [eeef] * 2
         self.joint_state.header.stamp = rospy.Time.now()
