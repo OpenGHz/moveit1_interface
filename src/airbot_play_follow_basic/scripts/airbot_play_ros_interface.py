@@ -16,7 +16,6 @@ class AirbotPlayRosInterface:
     def __init__(self, config: AIRBOTPlayCfg):
         self.robot = AIRBOTPlay(**asdict(config))
         assert self.robot.connect(), "Failed to connect to robot"
-        assert self.robot.connect(), "Failed to connect to robot"
         while not self.robot._feedback_jointstates:
             rospy.loginfo("Waiting for robot feedback...")
             rospy.sleep(0.5)
