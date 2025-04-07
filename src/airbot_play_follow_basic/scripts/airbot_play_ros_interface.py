@@ -16,16 +16,13 @@ class AirbotPlayRosInterface:
     def __init__(self, config: AIRBOTPlayCfg):
         self.robot = AIRBOTPlay(**asdict(config))
         assert self.robot.connect(), "Failed to connect to robot"
-        self.robot.switch_mode(RobotMode.SERVO_JOINT_POS)
+        assert self.robot.connect(), "Failed to connect to robot"
         while not self.robot._feedback_jointstates:
             rospy.loginfo("Waiting for robot feedback...")
             rospy.sleep(0.5)
         rospy.loginfo("Robot feedback received.")
-
+        assert self.robot.switch_mode(RobotMode.SERVO_JOINT_POS)
         self.eef_factor = 0.07
-
-        self.tar_jq = np.zeros(7)
-
         self.joint_state_puber = rospy.Publisher(
             "/airbot_play/joint_states", JointState, queue_size=5
         )
@@ -51,15 +48,6 @@ class AirbotPlayRosInterface:
 
     def arm_cmd_cb(self, msg: JointState):
         self.robot.servo_joint_pos(msg.position)
-
-    def eef_cmd_cb(self, msg: JointState):
-        self.tar_jq[6] = msg.position[0] * self.eef_factor
-
-    def gripper_bool_cmd_cb(self, msg: Bool):
-        self.tar_jq[6] = 0.0 if msg.data else self.eef_factor
-
-    def gripper_float_cmd_cb(self, msg: Float64):
-        self.tar_jq[6] = msg.data * self.eef_factor
 
     def pub_joint_states(self, event):
         qpos = self.robot.get_joint_pos()
