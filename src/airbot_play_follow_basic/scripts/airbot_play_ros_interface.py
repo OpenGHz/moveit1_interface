@@ -32,12 +32,6 @@ class AirbotPlayRosInterface:
         self.arm_joint_cmd_suber = rospy.Subscriber(
             "/airbot_play/joint_cmd", JointState, self.arm_cmd_cb
         )
-        self.eef_joint_cmd_suber = rospy.Subscriber(
-            "/airbot_play/end_effector/command", JointState, self.eef_cmd_cb
-        )
-        self.gripper_bool_cmd_suber = rospy.Subscriber(
-            "/airbot_play/gripper/state_cmd", Bool, self.gripper_bool_cmd_cb
-        )
         self.gripper_float_cmd_suber = rospy.Subscriber(
             "/airbot_play/gripper/set_position", Float64, self.gripper_float_cmd_cb
         )
@@ -48,6 +42,9 @@ class AirbotPlayRosInterface:
 
     def arm_cmd_cb(self, msg: JointState):
         self.robot.servo_joint_pos(msg.position)
+
+    def gripper_float_cmd_cb(self, msg: Float64):
+        self.robot.servo_eef_pos(msg.data * self.eef_factor)
 
     def pub_joint_states(self, event):
         qpos = self.robot.get_joint_pos()
